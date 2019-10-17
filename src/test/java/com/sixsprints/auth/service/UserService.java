@@ -8,7 +8,11 @@ import org.springframework.stereotype.Service;
 import com.sixsprints.auth.domain.mock.User;
 import com.sixsprints.auth.repository.UserRepository;
 import com.sixsprints.auth.service.Impl.AbstractAuthService;
+import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.dto.MetaData;
+import com.sixsprints.core.exception.EntityAlreadyExistsException;
+import com.sixsprints.core.exception.EntityInvalidException;
+import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.generic.GenericRepository;
 import com.sixsprints.core.utils.EncryptionUtil;
 
@@ -52,5 +56,21 @@ public class UserService extends AbstractAuthService<User> {
   protected MetaData<User> metaData(User entity) {
     return MetaData.<User>builder().collection("user").prefix("U")
       .classType(User.class).build();
+  }
+
+  @Override
+  protected EntityInvalidException invalidException(User domain) {
+    return EntityInvalidException.childBuilder().error(Messages.USER_IS_INVALID).data(domain).build();
+  }
+
+  @Override
+  protected EntityAlreadyExistsException alreadyExistsException(User domain) {
+    return EntityAlreadyExistsException.childBuilder().error(Messages.USER_ALREADY_EXISTS)
+      .arguments(new String[] { domain.getEmail() }).data(domain).build();
+  }
+
+  @Override
+  protected NotAuthenticatedException notAuthenticatedException(User domain) {
+    return NotAuthenticatedException.childBuilder().error(Messages.LOGIN_FAILED).data(domain).build();
   }
 }
