@@ -26,13 +26,11 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
   @Override
   public AuthResponseDTO<T> login(Authenticable authenticable) throws NotAuthenticatedException {
     T domain = findByAuthCriteria(authenticable.authId());
-    if (domain == null) {
-      throw NotAuthenticatedException.childBuilder().error("Credential mismatch").build();
-    }
-    if (isPasscodeSame(domain, authenticable.passcode())) {
-      return generateToken(domain);
-    }
-    throw NotAuthenticatedException.childBuilder().error("Credential mismatch").build();
+    if (domain != null)
+      if (isPasscodeSame(domain, authenticable.passcode()))
+        return generateToken(domain);
+    throw notAuthenticatedException(domain);
+    // in response data-> if null then unregistered else credential mismatch
   }
 
   @Override
@@ -48,6 +46,8 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
   protected abstract T findByAuthCriteria(String criteria);
 
   protected abstract boolean isPasscodeSame(T domain, String passcode);
+
+  protected abstract NotAuthenticatedException notAuthenticatedException(T domain);
 
   private AuthResponseDTO<T> generateToken(T domain) {
     return AuthResponseDTO.<T>builder().token(AuthUtil.createToken(domain.getId())).data(domain).build();
