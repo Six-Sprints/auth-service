@@ -8,7 +8,6 @@ import com.sixsprints.auth.service.AuthService;
 import com.sixsprints.core.domain.AbstractMongoEntity;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
-import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.AbstractCrudService;
 import com.sixsprints.core.utils.AuthUtil;
@@ -34,23 +33,34 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
   }
 
   @Override
-  public void resetPassword(Authenticable authenticable) throws EntityNotFoundException {
-//    T domain = findByCriteria(loginDTO.getEmail());
-//    if (domain == null)
-//      throw EntityNotFoundException.childBuilder().error("EMAIL_NOT_FOUND")
-//        .arguments(new String[] { loginDTO.getEmail() }).build();
-//    domain.setPassword(EncryptionUtil.encrypt(loginDTO.getPassword(), ENCRYPTION_ALGORITHM));
-//    repository().save(domain);
+  public void resetMailOTP(String email) {
+    // find T by email
+    T domain = findByAuthCriteria(email);
+
+    // if T's valid then
+    if (domain != null) {
+      // generate otp, save otp, mail otp
+      genSaveMailOTP(domain);
+    }
+  }
+
+  @Override
+  public void resetPassword(Authenticable authenticable) throws EntityInvalidException {
+    updatePassword(authenticable);
+  }
+
+  private AuthResponseDTO<T> generateToken(T domain) {
+    return AuthResponseDTO.<T>builder().token(AuthUtil.createToken(domain.getId())).data(domain).build();
   }
 
   protected abstract T findByAuthCriteria(String criteria);
 
   protected abstract boolean isPasscodeSame(T domain, String passcode);
 
-  protected abstract NotAuthenticatedException notAuthenticatedException(T domain);
+  protected abstract void genSaveMailOTP(T domain);
 
-  private AuthResponseDTO<T> generateToken(T domain) {
-    return AuthResponseDTO.<T>builder().token(AuthUtil.createToken(domain.getId())).data(domain).build();
-  }
+  protected abstract void updatePassword(Authenticable authenticable) throws EntityInvalidException;
+
+  protected abstract NotAuthenticatedException notAuthenticatedException(T domain);
 
 }

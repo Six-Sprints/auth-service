@@ -5,7 +5,6 @@ import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.core.domain.AbstractMongoEntity;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
-import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 
 /**
@@ -31,7 +30,9 @@ public interface AuthService<T extends AbstractMongoEntity> {
 
   AuthResponseDTO<T> login(Authenticable authenticable) throws NotAuthenticatedException;
 
-  void resetPassword(Authenticable authenticable) throws EntityNotFoundException;
+  void resetMailOTP(String email);
+
+  void resetPassword(Authenticable authenticable) throws EntityInvalidException;
 
 //  boolean tokenValidation(String token);
 
