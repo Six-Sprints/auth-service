@@ -6,6 +6,7 @@ import com.sixsprints.core.domain.AbstractMongoEntity;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
+import com.sixsprints.core.service.GenericCrudService;
 
 /**
  * Authentication Service API to do general authentication operations like
@@ -24,7 +25,7 @@ import com.sixsprints.core.exception.NotAuthenticatedException;
  * 
  * @param <T> the type of domain entity which should either be {@code AbstractMongoEntity} or it's child
  */
-public interface AuthService<T extends AbstractMongoEntity> {
+public interface AuthService<T extends AbstractMongoEntity> extends GenericCrudService<T> {
 
   AuthResponseDTO<T> register(T domain) throws EntityAlreadyExistsException, EntityInvalidException;
 
