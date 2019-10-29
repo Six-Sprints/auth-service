@@ -35,8 +35,4 @@ public interface AuthService<T extends AbstractMongoEntity> extends GenericCrudS
 
   void resetPassword(Authenticable authenticable) throws EntityInvalidException;
 
-//  boolean tokenValidation(String token);
-
-//  <D extends AbstractDomain> void logout(D domain, String token);
-
 }
