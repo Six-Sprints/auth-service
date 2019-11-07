@@ -5,14 +5,17 @@ import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.core.domain.AbstractMongoEntity;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
+import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.GenericCrudService;
 
 /**
  * Authentication Service API to do general authentication operations like
- * {@code login, registration, password reset, logout} using CRUD operations defined in mongo-core API.
+ * {@code login, registration, password reset, logout} using CRUD operations
+ * defined in mongo-core API.
  * <p>
- * The implementer of this interface should provide definition of below mentioned methods<br>
+ * The implementer of this interface should provide definition of below
+ * mentioned methods<br>
  * <br>
  * <code>GenericRepository&lt;T&gt; repository()</code><br>
  * <code>boolean isInvalid(T domain)</code><br>
@@ -23,15 +26,18 @@ import com.sixsprints.core.service.GenericCrudService;
  * <code>pre/post-processing</code><br>
  * <code>method returning Exception</code>
  * 
- * @param <T> the type of domain entity which should either be {@code AbstractMongoEntity} or it's child
+ * @param <T> the type of domain entity which should either be
+ *            {@code AbstractMongoEntity} or it's child
  */
 public interface AuthService<T extends AbstractMongoEntity> extends GenericCrudService<T> {
 
   AuthResponseDTO<T> register(T domain) throws EntityAlreadyExistsException, EntityInvalidException;
 
-  AuthResponseDTO<T> login(Authenticable authenticable) throws NotAuthenticatedException;
+  Boolean isEmailValid(String email) throws EntityNotFoundException;
 
-  void resetMailOTP(String email);
+  AuthResponseDTO<T> login(Authenticable authenticable) throws NotAuthenticatedException, EntityNotFoundException;
+
+  void resetMailOTP(String email) throws EntityNotFoundException;
 
   void resetPassword(Authenticable authenticable) throws EntityInvalidException;
 

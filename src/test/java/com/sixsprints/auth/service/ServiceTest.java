@@ -11,6 +11,7 @@ import com.sixsprints.auth.dto.AuthResponseDTO;
 import com.sixsprints.auth.dto.LoginDTO;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
+import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 
 public class ServiceTest extends AuthServiceApplicationTests {
@@ -43,7 +44,7 @@ public class ServiceTest extends AuthServiceApplicationTests {
 
   @Test
   public void loginUserShouldSucceed()
-    throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException {
+    throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
     authService.register(user);
 
@@ -54,7 +55,7 @@ public class ServiceTest extends AuthServiceApplicationTests {
 
   @Test(expected = NotAuthenticatedException.class)
   public void loginUserShouldNotSucceedWrongPswrd()
-    throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException {
+    throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
     authService.register(user);
 
@@ -63,9 +64,9 @@ public class ServiceTest extends AuthServiceApplicationTests {
     Assert.isNull(login, "Login should gets failed but didn't");
   }
 
-  @Test(expected = NotAuthenticatedException.class)
+  @Test(expected = EntityNotFoundException.class)
   public void loginUserShouldNotSucceedNotRegistered()
-    throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException {
+    throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
     authService.register(user);
 

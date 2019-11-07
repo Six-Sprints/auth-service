@@ -23,6 +23,7 @@ import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.dto.MetaData;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
+import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.generic.GenericRepository;
 import com.sixsprints.core.utils.EncryptionUtil;
@@ -158,6 +159,12 @@ public class UserService extends AbstractAuthService<User> {
 
   @Override
   protected NotAuthenticatedException notAuthenticatedException(User domain) {
-    return NotAuthenticatedException.childBuilder().error(Messages.LOGIN_FAILED).data(domain).build();
+    return NotAuthenticatedException.childBuilder().error(Messages.LOGIN_FAILED_MISMATCH).data(domain).build();
   }
+
+  @Override
+  protected EntityNotFoundException notRegisteredException(User domain) {
+    return EntityNotFoundException.childBuilder().error(Messages.LOGIN_FAILED_UNREGISTERED).data(domain).build();
+  }
+
 }
