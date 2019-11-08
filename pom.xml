@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>com.github.Six-Sprints</groupId>
 			<artifactId>mongo-core</artifactId>
-			<version>v0.1.2-SNAPSHOT</version>
+			<version>v0.1.3-SNAPSHOT</version>
 		</dependency>
 
 
