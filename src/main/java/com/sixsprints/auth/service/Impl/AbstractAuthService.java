@@ -55,8 +55,9 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
     if (domain != null) {
       // generate otp, save otp, mail otp
       genSaveMailOTP(domain);
+    } else {
+      throw notRegisteredException(domain);
     }
-    throw notRegisteredException(domain);
   }
 
   @Override
