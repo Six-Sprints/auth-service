@@ -29,7 +29,7 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
     if (domain != null) {
       return true;
     }
-    throw notRegisteredException(domain);
+    throw notRegisteredException(email);
   }
 
   @Override
@@ -43,7 +43,7 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
       }
       throw notAuthenticatedException(domain);
     }
-    throw notRegisteredException(domain);
+    throw notRegisteredException(authenticable.authId());
   }
 
   @Override
@@ -56,7 +56,7 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
       // generate otp, save otp, mail otp
       genSaveMailOTP(domain);
     } else {
-      throw notRegisteredException(domain);
+      throw notRegisteredException(email);
     }
   }
 
@@ -79,6 +79,6 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
 
   protected abstract NotAuthenticatedException notAuthenticatedException(T domain);
 
-  protected abstract EntityNotFoundException notRegisteredException(T domain);
+  protected abstract EntityNotFoundException notRegisteredException(String authId);
 
 }

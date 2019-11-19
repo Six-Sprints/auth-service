@@ -163,8 +163,8 @@ public class UserService extends AbstractAuthService<User> {
   }
 
   @Override
-  protected EntityNotFoundException notRegisteredException(User domain) {
-    return EntityNotFoundException.childBuilder().error(Messages.LOGIN_FAILED_UNREGISTERED).data(domain).build();
+  protected EntityNotFoundException notRegisteredException(String email) {
+    return EntityNotFoundException.childBuilder().error(Messages.LOGIN_FAILED_UNREGISTERED).data(email).build();
   }
 
 }
