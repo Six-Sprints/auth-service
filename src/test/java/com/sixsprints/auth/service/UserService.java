@@ -10,7 +10,6 @@ import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.sixsprints.auth.domain.mock.PasswordResetOtp;
@@ -37,8 +36,8 @@ public class UserService extends AbstractAuthService<User> {
   @Resource
   private PasswordResetOtpRepository passwordResetOtpRepository;
 
-  @Resource
-  private JavaMailSender mailSender;
+  // @Resource
+  // private JavaMailSender mailSender;
 
   @Override
   protected GenericRepository<User> repository() {
@@ -91,7 +90,9 @@ public class UserService extends AbstractAuthService<User> {
     passwordResetOtpRepository.save(passwordResetOtp);
 
     // mail otp
-    mailSender.send(constructEmail(otp, user));
+    // mailSender.send(constructEmail(otp, user));
+    SimpleMailMessage email = constructEmail(otp, user);
+    System.out.println(email.toString());
   }
 
   // avoid duplicate otp
