@@ -65,7 +65,7 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
     updatePassword(authenticable);
   }
 
-  private AuthResponseDTO<T> generateToken(T domain) {
+  protected AuthResponseDTO<T> generateToken(T domain) {
     return AuthResponseDTO.<T>builder().token(AuthUtil.createToken(domain.getId())).data(domain).build();
   }
 
