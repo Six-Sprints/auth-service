@@ -39,6 +39,8 @@ public interface AuthService<T extends AbstractMongoEntity> extends GenericCrudS
 
   void resetMailOTP(String email) throws EntityNotFoundException;
 
-  void resetPassword(Authenticable authenticable) throws EntityInvalidException;
+  void resetValidateOTP(Authenticable authenticable) throws EntityInvalidException;
+
+  void resetPassword(Authenticable authenticable);
 
 }

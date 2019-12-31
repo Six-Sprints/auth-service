@@ -9,7 +9,6 @@ import java.util.Random;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
@@ -91,7 +90,7 @@ public class UserService extends AbstractAuthService<User> {
     passwordResetOtpRepository.save(passwordResetOtp);
 
     // mail otp
-    mailSender.send(constructEmail(otp, user));
+    System.out.println(constructEmail(otp, user));
   }
 
   // avoid duplicate otp
@@ -110,17 +109,12 @@ public class UserService extends AbstractAuthService<User> {
     return false;
   }
 
-  private SimpleMailMessage constructEmail(String otp, User user) {
-    SimpleMailMessage email = new SimpleMailMessage();
-    email.setSubject("");
-    email.setText("" + otp);
-    email.setTo(user.getEmail());
-    email.setFrom("");// env.getProperty("support.email"));
-    return email;
+  private String constructEmail(String otp, User user) {
+    return "OTP for " + user.getEmail() + " is " + otp;
   }
 
   @Override
-  protected void updatePassword(Authenticable authenticable) throws EntityInvalidException {
+  protected void validateOTP(Authenticable authenticable) throws EntityInvalidException {
     // take otp, find T
     PasswordResetOtp passwordResetOtp = passwordResetOtpRepository.findByOtp(authenticable.authId());
 
@@ -130,6 +124,12 @@ public class UserService extends AbstractAuthService<User> {
     // verify for expired otp
     if (passwordResetOtp.getExpiryDate().getTime() - Calendar.getInstance().getTime().getTime() <= 0)
       throw EntityInvalidException.childBuilder().error("OTP expired").data(passwordResetOtp).build();
+  }
+
+  @Override
+  protected void updatePassword(Authenticable authenticable) {
+    // take otp, find T
+    PasswordResetOtp passwordResetOtp = passwordResetOtpRepository.findByOtp(authenticable.authId());
 
     // if all ok then password update of T
     User user = passwordResetOtp.getUser();

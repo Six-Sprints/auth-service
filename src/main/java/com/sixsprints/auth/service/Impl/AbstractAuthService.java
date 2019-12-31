@@ -61,7 +61,12 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
   }
 
   @Override
-  public void resetPassword(Authenticable authenticable) throws EntityInvalidException {
+  public void resetValidateOTP(Authenticable authenticable) throws EntityInvalidException {
+    validateOTP(authenticable);
+  }
+
+  @Override
+  public void resetPassword(Authenticable authenticable) {
     updatePassword(authenticable);
   }
 
@@ -75,7 +80,9 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
 
   protected abstract void genSaveMailOTP(T domain);
 
-  protected abstract void updatePassword(Authenticable authenticable) throws EntityInvalidException;
+  protected abstract void validateOTP(Authenticable authenticable) throws EntityInvalidException;
+
+  protected abstract void updatePassword(Authenticable authenticable);
 
   protected abstract NotAuthenticatedException notAuthenticatedException(T domain);
 
