@@ -41,6 +41,6 @@ public interface AuthService<T extends AbstractMongoEntity> extends GenericCrudS
 
   void resetValidateOTP(Authenticable authenticable) throws EntityInvalidException;
 
-  void resetPassword(Authenticable authenticable);
+  void resetPassword(Authenticable authenticable) throws EntityInvalidException;
 
 }

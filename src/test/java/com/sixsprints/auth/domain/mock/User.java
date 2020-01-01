@@ -28,4 +28,6 @@ public class User extends AbstractMongoEntity {
 
   private String password;
 
+  private String mobileNumber;
+
 }

@@ -66,7 +66,7 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
   }
 
   @Override
-  public void resetPassword(Authenticable authenticable) {
+  public void resetPassword(Authenticable authenticable) throws EntityInvalidException {
     updatePassword(authenticable);
   }
 
@@ -82,7 +82,7 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
 
   protected abstract void validateOTP(Authenticable authenticable) throws EntityInvalidException;
 
-  protected abstract void updatePassword(Authenticable authenticable);
+  protected abstract void updatePassword(Authenticable authenticable) throws EntityInvalidException;
 
   protected abstract NotAuthenticatedException notAuthenticatedException(T domain);
 

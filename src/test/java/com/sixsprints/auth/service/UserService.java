@@ -1,21 +1,16 @@
 package com.sixsprints.auth.service;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
-import com.sixsprints.auth.domain.mock.PasswordResetOtp;
+import com.sixsprints.auth.domain.mock.PasswordReset;
 import com.sixsprints.auth.domain.mock.User;
 import com.sixsprints.auth.dto.Authenticable;
-import com.sixsprints.auth.repository.PasswordResetOtpRepository;
+import com.sixsprints.auth.dto.PasswordResetDTO;
+import com.sixsprints.auth.repository.PasswordResetRepository;
 import com.sixsprints.auth.repository.UserRepository;
 import com.sixsprints.auth.service.Impl.AbstractAuthService;
 import com.sixsprints.auth.util.Messages;
@@ -26,18 +21,19 @@ import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.generic.GenericRepository;
 import com.sixsprints.core.utils.EncryptionUtil;
+import com.sixsprints.core.utils.RandomUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class UserService extends AbstractAuthService<User> {
 
   @Resource
   private UserRepository userRepository;
 
   @Resource
-  private PasswordResetOtpRepository passwordResetOtpRepository;
-
-  @Resource
-  private JavaMailSender mailSender;
+  private PasswordResetRepository passwordResetRepository;
 
   @Override
   protected GenericRepository<User> repository() {
@@ -51,17 +47,28 @@ public class UserService extends AbstractAuthService<User> {
 
   @Override
   protected User findDuplicate(User entity) {
-    return findByAuthCriteria(entity.getEmail());
+    return userRepository.findByEmailOrMobileNumber(entity.getEmail(), entity.getMobileNumber());
   }
 
+  // required checks and operations, before creating new User
   @Override
-  protected void preCreate(User entity) {
-    entity.setPassword(EncryptionUtil.encrypt(entity.getPassword()));
+  protected void preCreate(User user) {
+
+    // if password blank then set default password (email itself) else encrypt it
+    if (StringUtils.isBlank(user.getPassword())) {
+      user.setPassword(EncryptionUtil.encrypt(user.getEmail()));
+    } else
+      user.setPassword(EncryptionUtil.encrypt(user.getPassword()));
+
   }
 
   @Override
   protected User findByAuthCriteria(String authId) {
     return userRepository.findByEmail(authId);
+  }
+
+  public User findByEmail(String email) {
+    return userRepository.findByEmail(email);
   }
 
   @Override
@@ -71,79 +78,60 @@ public class UserService extends AbstractAuthService<User> {
 
   @Override
   protected void genSaveMailOTP(User user) {
-    // generate otp while avoiding duplicate otp
-    String otp;
-    do {
-      String num = "0123456789";
-      Random random = new Random();
-      StringBuilder tempOtp = new StringBuilder();
-      for (int i = 1; i <= 6; i++) {
-        tempOtp.append(num.charAt(random.nextInt(10)));
-      }
-      otp = tempOtp.toString();
-    } while (isAgain(otp));
+    // generate otp
+    String otp = String.valueOf(RandomUtil.randomInt(1000, 9999));
 
     // save otp
-    PasswordResetOtp passwordResetOtp = PasswordResetOtp.builder().otp(otp).user(user).build();
-    passwordResetOtp.calculateExpiryDate();
-    generateSlugIfRequired(user);
-    passwordResetOtpRepository.save(passwordResetOtp);
+    PasswordReset passwordReset = PasswordReset.builder().otp(otp).email(user.getEmail()).build();
+    passwordResetRepository.save(passwordReset);
 
     // mail otp
-    System.out.println(constructEmail(otp, user));
-  }
-
-  // avoid duplicate otp
-  private boolean isAgain(String otp) {
-    List<PasswordResetOtp> otpList = passwordResetOtpRepository.findAll();
-    for (Iterator<PasswordResetOtp> iterator = otpList.iterator(); iterator.hasNext();) {
-      PasswordResetOtp passwordResetOtp = (PasswordResetOtp) iterator.next();
-      if (passwordResetOtp.getOtp().equals(otp)) {
-        if (passwordResetOtp.getExpiryDate().before(new Date())) {
-          passwordResetOtpRepository.deleteAllByExpiryDateBefore(new Date());
-          return false;
-        }
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private String constructEmail(String otp, User user) {
-    return "OTP for " + user.getEmail() + " is " + otp;
+    log.info("Your OTP: " + otp);
   }
 
   @Override
   protected void validateOTP(Authenticable authenticable) throws EntityInvalidException {
+    PasswordResetDTO passwordResetDTO = (PasswordResetDTO) authenticable;
     // take otp, find T
-    PasswordResetOtp passwordResetOtp = passwordResetOtpRepository.findByOtp(authenticable.authId());
+    PasswordReset passwordReset = passwordResetRepository.findByEmail(passwordResetDTO.getEmail());
 
     // verify for valid otp
-    if (passwordResetOtp == null)
-      throw EntityInvalidException.childBuilder().error("Invalid OTP").data(passwordResetOtp).build();
+    if (passwordReset == null || !StringUtils.equals(passwordReset.getOtp(), passwordResetDTO.getOtp())) {
+      throw EntityInvalidException.childBuilder().error("Invalid OTP").data(passwordReset).build();
+    }
     // verify for expired otp
-    if (passwordResetOtp.getExpiryDate().getTime() - Calendar.getInstance().getTime().getTime() <= 0)
-      throw EntityInvalidException.childBuilder().error("OTP expired").data(passwordResetOtp).build();
+    if (DateTime.now()
+      .isAfter(new DateTime(passwordReset.getDateCreated()).plusMinutes(10))) {
+      throw EntityInvalidException.childBuilder().error("OTP expired").data(passwordReset).build();
+    }
   }
 
   @Override
-  protected void updatePassword(Authenticable authenticable) {
+  protected void updatePassword(Authenticable authenticable) throws EntityInvalidException {
+    PasswordResetDTO passwordResetDTO = (PasswordResetDTO) authenticable;
     // take otp, find T
-    PasswordResetOtp passwordResetOtp = passwordResetOtpRepository.findByOtp(authenticable.authId());
+    PasswordReset passwordReset = passwordResetRepository.findByEmail(passwordResetDTO.getEmail());
+
+    // verify for valid otp
+    if (passwordReset == null || !StringUtils.equals(passwordReset.getOtp(), passwordResetDTO.getOtp())) {
+      throw EntityInvalidException.childBuilder().error("Invalid OTP").data(passwordReset).build();
+    }
+    // verify for expired otp
+    if (DateTime.now()
+      .isAfter(new DateTime(passwordReset.getDateCreated()).plusMinutes(10))) {
+      throw EntityInvalidException.childBuilder().error("OTP expired").data(passwordReset).build();
+    }
 
     // if all ok then password update of T
-    User user = passwordResetOtp.getUser();
+    User user = findByAuthCriteria(passwordResetDTO.getEmail());
     user.setPassword(EncryptionUtil.encrypt(authenticable.passcode()));
     save(user);
-    // expire otp to prevent another use of same otp
-    passwordResetOtp.setExpiryDate(new Date());
-    passwordResetOtpRepository.save(passwordResetOtp);
+    passwordResetRepository.delete(passwordReset);
   }
 
   @Override
   protected MetaData<User> metaData(User entity) {
-    return MetaData.<User>builder().collection("user").prefix("U")
-      .classType(User.class).build();
+    return MetaData.<User>builder().collection("user").prefix("USR").classType(User.class).build();
   }
 
   @Override
@@ -154,7 +142,7 @@ public class UserService extends AbstractAuthService<User> {
   @Override
   protected EntityAlreadyExistsException alreadyExistsException(User domain) {
     return EntityAlreadyExistsException.childBuilder().error(Messages.USER_ALREADY_EXISTS)
-      .arguments(new String[] { domain.getEmail() }).data(domain).build();
+      .arguments(new String[] { domain.getEmail(), domain.getMobileNumber() }).build();
   }
 
   @Override

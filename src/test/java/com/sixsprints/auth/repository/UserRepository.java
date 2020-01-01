@@ -10,4 +10,6 @@ public interface UserRepository extends GenericRepository<User> {
 
   User findByEmail(String email);
 
+  User findByEmailOrMobileNumber(String email, String mobileNumber);
+
 }
