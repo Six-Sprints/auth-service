@@ -18,8 +18,12 @@ public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends
   implements AuthService<T> {
 
   @Override
-  public AuthResponseDTO<T> register(T domain) throws EntityAlreadyExistsException, EntityInvalidException {
+  public AuthResponseDTO<T> register(T domain, boolean isPostProcessing)
+    throws EntityAlreadyExistsException, EntityInvalidException, EntityNotFoundException {
     T create = create(domain);
+    if (isPostProcessing) {
+      create = update(create.getId(), create);
+    }
     return generateToken(create);
   }
 

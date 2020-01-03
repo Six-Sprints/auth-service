@@ -20,25 +20,26 @@ public class ServiceTest extends AuthServiceApplicationTests {
   private AuthService<User> authService;
 
   @Test
-  public void registerUserShouldSucceed() throws EntityAlreadyExistsException, EntityInvalidException {
+  public void registerUserShouldSucceed()
+    throws EntityAlreadyExistsException, EntityInvalidException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
-    AuthResponseDTO<User> register = authService.register(user);
+    AuthResponseDTO<User> register = authService.register(user, false);
     Assert.notNull(register.getData().getId(), "Not registered");
   }
 
   @Test(expected = EntityInvalidException.class)
-  public void registerUserShouldNotSucceedEmptyEmail() throws EntityAlreadyExistsException, EntityInvalidException {
+  public void registerUserShouldNotSucceedEmptyEmail() throws EntityAlreadyExistsException, EntityInvalidException, EntityNotFoundException {
     User user = User.builder().name("Sudip").password("12345").build();
-    AuthResponseDTO<User> register = authService.register(user);
+    AuthResponseDTO<User> register = authService.register(user, false);
     Assert.notNull(register.getData().getId(), "Should not registered but did");
   }
 
   @Test(expected = EntityAlreadyExistsException.class)
-  public void registerUserShouldNotSucceedDuplicateEmail() throws EntityAlreadyExistsException, EntityInvalidException {
+  public void registerUserShouldNotSucceedDuplicateEmail() throws EntityAlreadyExistsException, EntityInvalidException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
-    authService.register(user);
+    authService.register(user, false);
     user = User.builder().name("Qwerty").email("sudip@email.com").password("14341").build();
-    AuthResponseDTO<User> register = authService.register(user);
+    AuthResponseDTO<User> register = authService.register(user, false);
     Assert.notNull(register.getData().getId(), "Should not registered but did");
   }
 
@@ -46,7 +47,7 @@ public class ServiceTest extends AuthServiceApplicationTests {
   public void loginUserShouldSucceed()
     throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
-    authService.register(user);
+    authService.register(user, false);
 
     LoginDTO loginDTO = LoginDTO.builder().email("sudip@email.com").password("12345").build();
     AuthResponseDTO<User> login = authService.login(loginDTO);
@@ -57,7 +58,7 @@ public class ServiceTest extends AuthServiceApplicationTests {
   public void loginUserShouldNotSucceedWrongPswrd()
     throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
-    authService.register(user);
+    authService.register(user, false);
 
     LoginDTO loginDTO = LoginDTO.builder().email("sudip@email.com").password("1234").build();
     AuthResponseDTO<User> login = authService.login(loginDTO);
@@ -68,7 +69,7 @@ public class ServiceTest extends AuthServiceApplicationTests {
   public void loginUserShouldNotSucceedNotRegistered()
     throws EntityAlreadyExistsException, EntityInvalidException, NotAuthenticatedException, EntityNotFoundException {
     User user = User.builder().name("Sudip").email("sudip@email.com").password("12345").build();
-    authService.register(user);
+    authService.register(user, false);
 
     LoginDTO loginDTO = LoginDTO.builder().email("qwerty@email.com").password("12345").build();
     AuthResponseDTO<User> login = authService.login(loginDTO);

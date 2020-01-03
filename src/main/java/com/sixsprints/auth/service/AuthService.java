@@ -31,7 +31,8 @@ import com.sixsprints.core.service.GenericCrudService;
  */
 public interface AuthService<T extends AbstractMongoEntity> extends GenericCrudService<T> {
 
-  AuthResponseDTO<T> register(T domain) throws EntityAlreadyExistsException, EntityInvalidException;
+  AuthResponseDTO<T> register(T domain, boolean isPostProcessing)
+    throws EntityAlreadyExistsException, EntityInvalidException, EntityNotFoundException;
 
   Boolean isEmailValid(String email) throws EntityNotFoundException;
 
