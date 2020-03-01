@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class AuthServiceApplicationTests {
+
   @Autowired
   private MongoTemplate mongoTemplate;
 

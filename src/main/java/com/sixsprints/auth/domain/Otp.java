@@ -1,9 +1,9 @@
-package com.sixsprints.auth.domain.mock;
+package com.sixsprints.auth.domain;
 
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
+import com.sixsprints.core.domain.AbstractMongoEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,26 +11,19 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+@Document
 @Data
 @SuperBuilder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Document
-public class User extends AbstractAuthenticableEntity {
+public class Otp extends AbstractMongoEntity {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -6052126621706116633L;
 
-  private String name;
+  private String otp;
 
   @Indexed(unique = true)
-  private String email;
-
-  private String mobileNumber;
-
-  @Override
-  public String getAuthId() {
-    return getEmail();
-  }
+  private String authId;
 
 }

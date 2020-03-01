@@ -1,47 +1,27 @@
 package com.sixsprints.auth.service;
 
-import com.sixsprints.auth.dto.AuthResponseDTO;
+import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
+import com.sixsprints.auth.domain.Otp;
+import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
-import com.sixsprints.core.domain.AbstractMongoEntity;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.GenericCrudService;
 
-/**
- * Authentication Service API to do general authentication operations like
- * {@code login, registration, password reset, logout} using CRUD operations
- * defined in mongo-core API.
- * <p>
- * The implementer of this interface should provide definition of below
- * mentioned methods<br>
- * <br>
- * <code>GenericRepository&lt;T&gt; repository()</code><br>
- * <code>boolean isInvalid(T domain)</code><br>
- * <code>protected T findDuplicate(T entity)</code><br>
- * <code>protected T findByAuthCriteria(String authId)</code><br>
- * <code>protected boolean isPasscodeSame(T domain, String passcode)</code><br>
- * <code>MetaData&lt;T&gt; metaData(T entity)</code><br>
- * <code>pre/post-processing</code><br>
- * <code>method returning Exception</code>
- * 
- * @param <T> the type of domain entity which should either be
- *            {@code AbstractMongoEntity} or it's child
- */
-public interface AuthService<T extends AbstractMongoEntity> extends GenericCrudService<T> {
+public interface AuthService<T extends AbstractAuthenticableEntity, DTO> extends GenericCrudService<T> {
 
-  AuthResponseDTO<T> register(T domain, boolean isPostProcessing)
-    throws EntityAlreadyExistsException, EntityInvalidException, EntityNotFoundException;
+  AuthResponseDto<DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException;
 
-  Boolean isEmailValid(String email) throws EntityNotFoundException;
+  AuthResponseDto<DTO> login(Authenticable authenticable) throws NotAuthenticatedException, EntityNotFoundException;
 
-  AuthResponseDTO<T> login(Authenticable authenticable) throws NotAuthenticatedException, EntityNotFoundException;
+  Otp sendOtp(String authId) throws EntityNotFoundException;
 
-  void resetMailOTP(String email) throws EntityNotFoundException;
+  Otp validateOtp(String authId, String otp) throws EntityInvalidException;
 
-  void resetValidateOTP(Authenticable authenticable) throws EntityInvalidException;
+  void resetPassword(String authId, String otp, String newPassword) throws EntityInvalidException;
 
-  void resetPassword(Authenticable authenticable) throws EntityInvalidException;
+  void logout(T user, String token);
 
 }

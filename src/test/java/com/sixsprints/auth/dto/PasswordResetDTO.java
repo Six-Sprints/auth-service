@@ -26,12 +26,12 @@ public class PasswordResetDTO implements Authenticable {
   private String password;
 
   @Override
-  public String authId() {
+  public String getAuthId() {
     return email;
   }
 
   @Override
-  public String passcode() {
+  public String getPasscode() {
     return password;
   }
 }

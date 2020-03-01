@@ -49,9 +49,13 @@
 		<dependency>
 			<groupId>com.github.Six-Sprints</groupId>
 			<artifactId>mongo-core</artifactId>
-			<version>v2.2.4_1-SNAPSHOT</version>
+			<version>v2.2.4_5-SNAPSHOT</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.github.Six-Sprints</groupId>
+			<artifactId>notification</artifactId>
+			<version>v0.0.5-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -1,95 +1,128 @@
 package com.sixsprints.auth.service.Impl;
 
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.sixsprints.auth.dto.AuthResponseDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+
+import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
+import com.sixsprints.auth.domain.Otp;
+import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.auth.service.AuthService;
-import com.sixsprints.core.domain.AbstractMongoEntity;
+import com.sixsprints.auth.service.OtpService;
+import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.AbstractCrudService;
+import com.sixsprints.core.transformer.GenericTransformer;
 import com.sixsprints.core.utils.AuthUtil;
+import com.sixsprints.core.utils.EncryptionUtil;
+import com.sixsprints.notification.dto.MessageDto;
+import com.sixsprints.notification.service.NotificationService;
 
-@Service
-public abstract class AbstractAuthService<T extends AbstractMongoEntity> extends AbstractCrudService<T>
-  implements AuthService<T> {
+public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO> extends AbstractCrudService<T>
+  implements AuthService<T, DTO> {
 
-  @Override
-  public AuthResponseDTO<T> register(T domain, boolean isPostProcessing)
-    throws EntityAlreadyExistsException, EntityInvalidException, EntityNotFoundException {
-    T create = create(domain);
-    if (isPostProcessing) {
-      create = update(create.getId(), create);
-    }
-    return generateToken(create);
+  private final GenericTransformer<T, DTO> mapper;
+
+  private final NotificationService notificationService;
+
+  @Autowired
+  private OtpService otpService;
+
+  public AbstractAuthService(GenericTransformer<T, DTO> mapper, NotificationService notificationService) {
+    this.mapper = mapper;
+    this.notificationService = notificationService;
   }
 
   @Override
-  public Boolean isEmailValid(String email) throws EntityNotFoundException {
-    T domain = findByAuthCriteria(email);
-    if (domain != null) {
-      return true;
-    }
-    throw notRegisteredException(email);
+  public AuthResponseDto<DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException {
+    return generateToken(create(mapper.toDomain(dto)));
   }
 
   @Override
-  public AuthResponseDTO<T> login(Authenticable authenticable)
+  public AuthResponseDto<DTO> login(Authenticable authenticable)
     throws NotAuthenticatedException, EntityNotFoundException {
-    T domain = findByAuthCriteria(authenticable.authId());
-    // in response data-> if null then unregistered else credential mismatch
-    if (domain != null) {
-      if (isPasscodeSame(domain, authenticable.passcode())) {
-        return generateToken(domain);
-      }
-      throw notAuthenticatedException(domain);
+    T user = findByAuthId(authenticable.getAuthId());
+    if (user == null) {
+      throw notFoundException(authenticable.getAuthId());
     }
-    throw notRegisteredException(authenticable.authId());
-  }
-
-  @Override
-  public void resetMailOTP(String email) throws EntityNotFoundException {
-    // find T by email
-    T domain = findByAuthCriteria(email);
-
-    // if T's valid then
-    if (domain != null) {
-      // generate otp, save otp, mail otp
-      genSaveMailOTP(domain);
-    } else {
-      throw notRegisteredException(email);
+    if (wrongPassword(user.getPassword(), authenticable.getPasscode()) || !user.getActive()) {
+      throw loginFailedException(authenticable);
     }
+    return generateToken(user);
   }
 
   @Override
-  public void resetValidateOTP(Authenticable authenticable) throws EntityInvalidException {
-    validateOTP(authenticable);
+  public Otp sendOtp(String authId) throws EntityNotFoundException {
+    Otp otp = otpService.generate(authId, otpLength());
+    sendMessageToUser(otp);
+    return otp;
   }
 
   @Override
-  public void resetPassword(Authenticable authenticable) throws EntityInvalidException {
-    updatePassword(authenticable);
+  public Otp validateOtp(String authId, String otp) throws EntityInvalidException {
+    Otp otpFromDb = otpService.findByAuthIdAndOtp(authId, otp);
+    if (otpFromDb == null) {
+      throw EntityInvalidException.childBuilder().arg(authId).arg(otp).build();
+    }
+    return otpFromDb;
   }
 
-  protected AuthResponseDTO<T> generateToken(T domain) {
-    return AuthResponseDTO.<T>builder().token(AuthUtil.createToken(domain.getId())).data(domain).build();
+  @Override
+  public void resetPassword(String authId, String otp, String newPassword) throws EntityInvalidException {
+    Otp otpFromDb = validateOtp(authId, otp);
+    T user = findByAuthId(authId);
+    user.setPassword(EncryptionUtil.encrypt(newPassword));
+    save(user);
+    otpService.delete(otpFromDb);
   }
 
-  protected abstract T findByAuthCriteria(String criteria);
+  @Override
+  public void logout(T user, String token) {
+    if (CollectionUtils.isEmpty(user.getInvalidTokens())) {
+      user.setInvalidTokens(new ArrayList<>());
+    }
+    List<String> invalidTokens = user.getInvalidTokens();
+    if (invalidTokens.size() > 5) {
+      invalidTokens.remove(0);
+    }
+    invalidTokens.add(token);
+    save(user);
+  }
 
-  protected abstract boolean isPasscodeSame(T domain, String passcode);
+  protected abstract T findByAuthId(String authId);
 
-  protected abstract void genSaveMailOTP(T domain);
+  protected void sendMessageToUser(Otp otp) {
+    notificationService.sendMessage(otpMessage(otp));
+  }
 
-  protected abstract void validateOTP(Authenticable authenticable) throws EntityInvalidException;
+  protected MessageDto otpMessage(Otp otp) {
+    return MessageDto.builder().to(otp.getAuthId()).subject("OTP Generated Successfully")
+      .content(String.format("Your OTP: %s", otp.getOtp())).build();
+  }
 
-  protected abstract void updatePassword(Authenticable authenticable) throws EntityInvalidException;
+  protected int otpLength() {
+    return 4;
+  }
 
-  protected abstract NotAuthenticatedException notAuthenticatedException(T domain);
+  protected NotAuthenticatedException loginFailedException(Authenticable authenticable)
+    throws NotAuthenticatedException {
+    return NotAuthenticatedException.childBuilder().error((Messages.LOGIN_FAILED))
+      .arg(authenticable.getAuthId()).data(authenticable.getAuthId()).build();
+  }
 
-  protected abstract EntityNotFoundException notRegisteredException(String authId);
+  private AuthResponseDto<DTO> generateToken(T domain) {
+    return AuthResponseDto.<DTO>builder().token(AuthUtil.createToken(domain.getId())).data(mapper.toDto(domain))
+      .build();
+  }
+
+  private boolean wrongPassword(String passcodeFromDb, String passcode2) {
+    return !passcodeFromDb.equals(EncryptionUtil.encrypt(passcode2));
+  }
 
 }

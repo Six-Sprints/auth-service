@@ -1,7 +1,6 @@
 package com.sixsprints.auth.domain.mock;
 
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.sixsprints.core.domain.AbstractMongoEntity;
 
@@ -16,7 +15,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@Document
 public class PasswordReset extends AbstractMongoEntity {
 
   private static final long serialVersionUID = 3907769974134268344L;
