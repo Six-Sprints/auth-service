@@ -23,26 +23,26 @@ import com.sixsprints.core.utils.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, D> {
+public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, DTO, L extends Authenticable, R extends ResetPasscode> {
 
-  private final AuthService<T, D> service;
+  private final AuthService<T, DTO> service;
 
-  private final GenericTransformer<T, D> mapper;
+  private final GenericTransformer<T, DTO> mapper;
 
-  public AbstractAuthController(AuthService<T, D> service, GenericTransformer<T, D> mapper) {
+  public AbstractAuthController(AuthService<T, DTO> service, GenericTransformer<T, DTO> mapper) {
     this.service = service;
     this.mapper = mapper;
   }
 
   @PostMapping("/register")
-  public ResponseEntity<RestResponse<AuthResponseDto<D>>> register(@RequestBody @Valid D dto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Valid DTO dto)
     throws EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to register {}", dto);
     return RestUtil.successResponse(service.register(dto), HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<RestResponse<AuthResponseDto<D>>> login(@RequestBody @Valid Authenticable authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid Authenticable authDto)
     throws NotAuthenticatedException, EntityNotFoundException {
     log.info("Request to login {}", authDto.getAuthId());
     return RestUtil.successResponse(service.login(authDto));
@@ -65,7 +65,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   }
 
   @PostMapping("/validate-token")
-  public ResponseEntity<RestResponse<D>> validateToken(T user) {
+  public ResponseEntity<RestResponse<DTO>> validateToken(T user) {
     log.info("Validating token for {}", user);
     return RestUtil.successResponse(mapper.toDto(user));
   }
