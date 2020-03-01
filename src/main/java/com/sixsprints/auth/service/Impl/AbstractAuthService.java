@@ -47,11 +47,11 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   @Override
   public AuthResponseDto<DTO> login(Authenticable authenticable)
     throws NotAuthenticatedException, EntityNotFoundException {
-    T user = findByAuthId(authenticable.getAuthId());
+    T user = findByAuthId(authenticable.authId());
     if (user == null) {
-      throw notFoundException(authenticable.getAuthId());
+      throw notFoundException(authenticable.authId());
     }
-    if (wrongPassword(user.getPassword(), authenticable.getPasscode()) || !user.getActive()) {
+    if (wrongPassword(user.getPassword(), authenticable.passcode()) || !user.getActive()) {
       throw loginFailedException(authenticable);
     }
     return generateToken(user);
@@ -113,7 +113,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   protected NotAuthenticatedException loginFailedException(Authenticable authenticable)
     throws NotAuthenticatedException {
     return NotAuthenticatedException.childBuilder().error((Messages.LOGIN_FAILED))
-      .arg(authenticable.getAuthId()).data(authenticable.getAuthId()).build();
+      .arg(authenticable.authId()).data(authenticable.authId()).build();
   }
 
   private AuthResponseDto<DTO> generateToken(T domain) {

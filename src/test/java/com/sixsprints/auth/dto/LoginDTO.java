@@ -22,12 +22,12 @@ public class LoginDTO implements Authenticable {
   private String password;
 
   @Override
-  public String getAuthId() {
+  public String authId() {
     return getEmail();
   }
 
   @Override
-  public String getPasscode() {
+  public String passcode() {
     return getPassword();
   }
 }

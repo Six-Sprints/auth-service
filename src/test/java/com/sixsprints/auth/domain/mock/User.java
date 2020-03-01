@@ -29,7 +29,7 @@ public class User extends AbstractAuthenticableEntity {
   private String mobileNumber;
 
   @Override
-  public String getAuthId() {
+  public String authId() {
     return getEmail();
   }
 

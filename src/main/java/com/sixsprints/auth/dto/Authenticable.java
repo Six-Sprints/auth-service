@@ -2,8 +2,8 @@ package com.sixsprints.auth.dto;
 
 public interface Authenticable {
 
-  String getAuthId();
+  String authId();
   
-  String getPasscode();
+  String passcode();
 
 }

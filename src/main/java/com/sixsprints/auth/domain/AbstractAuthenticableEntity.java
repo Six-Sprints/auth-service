@@ -28,7 +28,7 @@ public abstract class AbstractAuthenticableEntity extends AbstractMongoEntity im
   private List<String> invalidTokens;
 
   @Override
-  public String getPasscode() {
+  public String passcode() {
     return getPassword();
   }
 
