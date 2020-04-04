@@ -40,7 +40,7 @@ public class OtpServiceImpl extends AbstractCrudService<Otp> implements OtpServi
   }
 
   @Override
-  protected MetaData<Otp> metaData(Otp otp) {
+  protected MetaData<Otp> metaData() {
     return MetaData.<Otp>builder().classType(Otp.class).build();
   }
 

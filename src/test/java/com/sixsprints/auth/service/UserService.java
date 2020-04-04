@@ -54,8 +54,8 @@ public class UserService extends AbstractAuthService<User, UserDto> implements A
   }
 
   @Override
-  protected MetaData<User> metaData(User entity) {
-    return MetaData.<User>builder().collection("user").prefix("USR").classType(User.class).build();
+  protected MetaData<User> metaData() {
+    return MetaData.<User>builder().classType(User.class).build();
   }
 
   @Override
