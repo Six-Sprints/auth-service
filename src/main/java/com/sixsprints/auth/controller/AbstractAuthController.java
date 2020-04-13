@@ -66,7 +66,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
 
   @PostMapping("/validate-token")
   public ResponseEntity<RestResponse<DTO>> validateToken(T user) {
-    log.info("Validating token for {}", user);
+    log.info("Validating token for {}", user.authId());
     return RestUtil.successResponse(mapper.toDto(user));
   }
 
