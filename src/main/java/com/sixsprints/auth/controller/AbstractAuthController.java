@@ -43,7 +43,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
 
   @PostMapping("/login")
   public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid L authDto)
-    throws NotAuthenticatedException, EntityNotFoundException {
+    throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     log.info("Request to login {}", authDto.authId());
     return RestUtil.successResponse(service.login(authDto));
   }
