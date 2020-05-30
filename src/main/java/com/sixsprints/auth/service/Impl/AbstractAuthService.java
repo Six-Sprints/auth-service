@@ -116,7 +116,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
       .arg(authenticable.authId()).data(authenticable.authId()).build();
   }
 
-  private AuthResponseDto<DTO> generateToken(T domain) {
+  protected AuthResponseDto<DTO> generateToken(T domain) {
     return AuthResponseDto.<DTO>builder().token(AuthUtil.createToken(domain.getId())).data(mapper.toDto(domain))
       .build();
   }
