@@ -14,7 +14,8 @@ public interface AuthService<T extends AbstractAuthenticableEntity, DTO> extends
 
   AuthResponseDto<DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException;
 
-  AuthResponseDto<DTO> login(Authenticable authenticable) throws NotAuthenticatedException, EntityNotFoundException;
+  AuthResponseDto<DTO> login(Authenticable authenticable)
+    throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException;
 
   Otp sendOtp(String authId) throws EntityNotFoundException;
 

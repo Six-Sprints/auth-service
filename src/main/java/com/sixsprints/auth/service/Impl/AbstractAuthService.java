@@ -46,7 +46,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   @Override
   public AuthResponseDto<DTO> login(Authenticable authenticable)
-    throws NotAuthenticatedException, EntityNotFoundException {
+    throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     T user = findByAuthId(authenticable.authId());
     if (user == null) {
       throw notFoundException(authenticable.authId());
