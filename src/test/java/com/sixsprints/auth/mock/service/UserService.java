@@ -1,15 +1,18 @@
-package com.sixsprints.auth.service;
+package com.sixsprints.auth.mock.service;
+
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.sixsprints.auth.domain.mock.User;
-import com.sixsprints.auth.dto.UserDto;
-import com.sixsprints.auth.repository.UserRepository;
-import com.sixsprints.auth.service.Impl.AbstractAuthService;
-import com.sixsprints.auth.transformer.UserMapper;
+import com.sixsprints.auth.mock.domain.User;
+import com.sixsprints.auth.mock.dto.UserDto;
+import com.sixsprints.auth.mock.repository.UserRepository;
+import com.sixsprints.auth.mock.transformer.UserMapper;
+import com.sixsprints.auth.service.OtpBasedAuthService;
+import com.sixsprints.auth.service.Impl.AbstractOtpBasedAuthService;
 import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.dto.MetaData;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
@@ -19,7 +22,8 @@ import com.sixsprints.core.utils.EncryptionUtil;
 import com.sixsprints.notification.service.NotificationService;
 
 @Service
-public class UserService extends AbstractAuthService<User, UserDto> implements AuthService<User, UserDto> {
+public class UserService extends AbstractOtpBasedAuthService<User, UserDto>
+  implements OtpBasedAuthService<User, UserDto> {
 
   public UserService(UserMapper mapper, NotificationService notificationService) {
     super(mapper, notificationService);
@@ -43,10 +47,8 @@ public class UserService extends AbstractAuthService<User, UserDto> implements A
     return userRepository.findByEmailOrMobileNumber(entity.getEmail(), entity.getMobileNumber());
   }
 
-  // required checks and operations, before creating new User
   @Override
   protected void preCreate(User user) {
-    // if password blank then set default password (email itself) else encrypt it
     if (StringUtils.isBlank(user.getPassword())) {
       user.setPassword(EncryptionUtil.encrypt(user.getEmail()));
     } else
@@ -71,7 +73,12 @@ public class UserService extends AbstractAuthService<User, UserDto> implements A
 
   @Override
   protected User findByAuthId(String authId) {
-    return userRepository.findByEmail(authId);
+    return userRepository.findByMobileNumber(authId);
+  }
+
+  @Override
+  protected User newUser(String authId) {
+    return User.builder().mobileNumber(authId).email(UUID.randomUUID().toString().concat("@gmail.com")).build();
   }
 
 }

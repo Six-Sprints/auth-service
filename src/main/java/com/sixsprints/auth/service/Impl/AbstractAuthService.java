@@ -68,7 +68,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   public Otp validateOtp(String authId, String otp) throws EntityInvalidException {
     Otp otpFromDb = otpService.findByAuthIdAndOtp(authId, otp);
     if (otpFromDb == null) {
-      throw EntityInvalidException.childBuilder().arg(authId).arg(otp).build();
+      throw invalidOtpError(authId, otp);
     }
     return otpFromDb;
   }
@@ -119,6 +119,10 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   protected AuthResponseDto<DTO> generateToken(T domain) {
     return AuthResponseDto.<DTO>builder().token(AuthUtil.createToken(domain.getId())).data(mapper.toDto(domain))
       .build();
+  }
+
+  protected EntityInvalidException invalidOtpError(String authId, String otp) {
+    return EntityInvalidException.childBuilder().arg(authId).arg(otp).build();
   }
 
   private boolean wrongPassword(String passcodeFromDb, String passcode2) {

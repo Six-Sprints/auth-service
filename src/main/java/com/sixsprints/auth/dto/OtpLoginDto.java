@@ -1,8 +1,5 @@
 package com.sixsprints.auth.dto;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,21 +10,20 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "password")
-public class LoginDTO implements Authenticable {
-  @NotBlank
-  @Email
-  private String email;
-  @NotBlank
-  private String password;
+@ToString(exclude = "otp")
+public class OtpLoginDto implements Authenticable {
+
+  private String mobileNumber;
+
+  private String otp;
 
   @Override
   public String authId() {
-    return getEmail();
+    return getMobileNumber();
   }
 
   @Override
   public String passcode() {
-    return getPassword();
+    return getOtp();
   }
 }

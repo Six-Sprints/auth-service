@@ -1,4 +1,4 @@
-package com.sixsprints.auth.dto;
+package com.sixsprints.auth.mock.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

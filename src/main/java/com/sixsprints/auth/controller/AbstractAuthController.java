@@ -1,9 +1,8 @@
 package com.sixsprints.auth.controller;
 
-import javax.validation.Valid;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -35,21 +34,21 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   }
 
   @PostMapping("/register")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Valid DTO dto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Validated DTO dto)
     throws EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to register {}", dto);
     return RestUtil.successResponse(service.register(dto), HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid L authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Validated L authDto)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     log.info("Request to login {}", authDto.authId());
     return RestUtil.successResponse(service.login(authDto));
   }
 
   @PostMapping("/send-otp")
-  public ResponseEntity<RestResponse<String>> sendOtp(@RequestBody @Valid L auth)
+  public ResponseEntity<RestResponse<String>> sendOtp(@RequestBody @Validated L auth)
     throws EntityNotFoundException {
     log.info("Request to send otp for {}", auth.authId());
     service.sendOtp(auth.authId());
@@ -57,7 +56,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   }
 
   @PostMapping("/reset")
-  public ResponseEntity<RestResponse<String>> resetPassword(@RequestBody @Valid R resetDto)
+  public ResponseEntity<RestResponse<String>> resetPassword(@RequestBody @Validated R resetDto)
     throws EntityInvalidException {
     log.info("Request to reset password for {}", resetDto.authId());
     service.resetPassword(resetDto.authId(), resetDto.otp(), resetDto.passcode());

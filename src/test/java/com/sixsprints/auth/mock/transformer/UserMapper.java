@@ -1,9 +1,9 @@
-package com.sixsprints.auth.transformer;
+package com.sixsprints.auth.mock.transformer;
 
 import org.springframework.stereotype.Service;
 
-import com.sixsprints.auth.domain.mock.User;
-import com.sixsprints.auth.dto.UserDto;
+import com.sixsprints.auth.mock.domain.User;
+import com.sixsprints.auth.mock.dto.UserDto;
 import com.sixsprints.core.transformer.GenericTransformer;
 
 @Service
