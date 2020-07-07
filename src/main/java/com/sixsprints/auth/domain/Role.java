@@ -5,35 +5,30 @@ import java.util.List;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.sixsprints.auth.dto.Authenticable;
+import com.sixsprints.auth.dto.PermissionDto;
 import com.sixsprints.core.domain.AbstractMongoEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 
-@Document
 @Data
 @SuperBuilder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public abstract class AbstractAuthenticableEntity extends AbstractMongoEntity implements Authenticable {
+@Document
+public class Role extends AbstractMongoEntity {
 
-  private static final long serialVersionUID = 4277363213912119827L;
+  private static final long serialVersionUID = 6464769316000227488L;
 
-  private String password;
+  @Indexed(unique = true)
+  private String name;
 
-  private List<String> invalidTokens;
-
-  @Indexed
-  private String roleSlug;
-
-  @Override
-  public String passcode() {
-    return getPassword();
-  }
+  @Singular
+  private List<PermissionDto> permissions;
 
 }

@@ -1,5 +1,6 @@
 package com.sixsprints.auth.controller;
 
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 import org.hamcrest.CoreMatchers;
@@ -15,9 +16,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sixsprints.auth.domain.Otp;
+import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.OtpLoginDto;
 import com.sixsprints.auth.mock.dto.UserDto;
+import com.sixsprints.auth.mock.service.AuthenticatedArgumentResolver;
+import com.sixsprints.auth.mock.service.UserService;
 import com.sixsprints.auth.service.OtpService;
+import com.sixsprints.core.exception.EntityAlreadyExistsException;
+import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.notification.service.NotificationService;
 
 public class UserAuthControllerTest extends BaseControllerTest {
@@ -33,6 +39,9 @@ public class UserAuthControllerTest extends BaseControllerTest {
 
   @Autowired
   private OtpService otpService;
+
+  @Autowired
+  private UserService userService;
 
   @Before
   public void mockServices() {
@@ -160,6 +169,79 @@ public class UserAuthControllerTest extends BaseControllerTest {
       .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.FALSE)))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message", CoreMatchers.notNullValue()));
+  }
+
+  @Test
+  public void shouldLogout() throws Exception {
+    String mobileNumber = "9810306710";
+    AuthResponseDto<UserDto> user = saveUser(mobileNumber);
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/logout").header(AuthenticatedArgumentResolver.TOKEN, user.getToken()))
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)));
+  }
+
+  @Test
+  public void shouldLogoutIfInvalidTokenOrNoToken() throws Exception {
+    String mobileNumber = "9810306710";
+    saveUser(mobileNumber);
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/logout").header(AuthenticatedArgumentResolver.TOKEN, "DUMMY_TOKEN"))
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)));
+
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/logout"))
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)));
+  }
+
+  @Test
+  public void shouldValidateToken() throws Exception {
+    String mobileNumber = "9810306710";
+    AuthResponseDto<UserDto> user = saveUser(mobileNumber);
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/validate-token")
+        .header(AuthenticatedArgumentResolver.TOKEN, user.getToken()).contentType(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.data.mobileNumber", CoreMatchers.is(mobileNumber)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.data.slug", CoreMatchers.notNullValue()));
+
+  }
+
+  @Test
+  public void shouldNotValidateTokenIfInvalidToken() throws Exception {
+    String mobileNumber = "9810306710";
+    saveUser(mobileNumber);
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/validate-token")
+        .header(AuthenticatedArgumentResolver.TOKEN, "DUMMY_TOKEN").contentType(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.status().isForbidden())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.FALSE)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message", CoreMatchers.notNullValue()));
+  }
+
+  @Test
+  public void shouldNotValidateTokenIfEmptyToken() throws Exception {
+    String mobileNumber = "9810306710";
+    saveUser(mobileNumber);
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/validate-token").contentType(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.status().isForbidden())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.FALSE)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message", CoreMatchers.notNullValue()));
+  }
+
+  private AuthResponseDto<UserDto> saveUser(String mobileNumber)
+    throws EntityAlreadyExistsException, EntityInvalidException {
+    return userService.register(userDto(UUID.randomUUID().toString().concat("@gmail.com"), mobileNumber));
   }
 
   private String userJson(String mobileNumber, String email) throws JsonProcessingException {

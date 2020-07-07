@@ -3,6 +3,7 @@ package com.sixsprints.auth.service.Impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -84,6 +85,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   @Override
   public void logout(T user, String token) {
+    if (StringUtils.isEmpty(token)) {
+      return;
+    }
     if (CollectionUtils.isEmpty(user.getInvalidTokens())) {
       user.setInvalidTokens(new ArrayList<>());
     }

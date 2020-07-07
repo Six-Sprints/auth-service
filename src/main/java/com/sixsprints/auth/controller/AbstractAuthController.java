@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.sixsprints.auth.annotation.Authenticated;
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
@@ -64,15 +65,17 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   }
 
   @PostMapping("/validate-token")
-  public ResponseEntity<RestResponse<DTO>> validateToken(T user) {
+  public ResponseEntity<RestResponse<DTO>> validateToken(@Authenticated T user) {
     log.info("Validating token for {}", user.authId());
     return RestUtil.successResponse(mapper.toDto(user));
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<?> logout(T user, String token) {
-    log.info("Request to logout for {}", user.authId());
-    service.logout(user, token);
+  public ResponseEntity<?> logout(@Authenticated(required = false) T user, String token) {
+    if (user != null) {
+      log.info("Request to logout for {}", user.authId());
+      service.logout(user, token);
+    }
     return RestUtil.successResponse(null);
   }
 
