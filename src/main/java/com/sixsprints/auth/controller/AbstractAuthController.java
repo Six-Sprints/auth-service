@@ -1,8 +1,9 @@
 package com.sixsprints.auth.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -12,6 +13,7 @@ import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.auth.dto.ResetPasscode;
 import com.sixsprints.auth.service.AuthService;
+import com.sixsprints.auth.util.ThreadContext;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
@@ -35,21 +37,21 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   }
 
   @PostMapping("/register")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Validated DTO dto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Valid DTO dto)
     throws EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to register {}", dto);
     return RestUtil.successResponse(service.register(dto), HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Validated L authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid L authDto)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     log.info("Request to login {}", authDto.authId());
     return RestUtil.successResponse(service.login(authDto));
   }
 
   @PostMapping("/send-otp")
-  public ResponseEntity<RestResponse<String>> sendOtp(@RequestBody @Validated L auth)
+  public ResponseEntity<RestResponse<String>> sendOtp(@RequestBody @Valid L auth)
     throws EntityNotFoundException {
     log.info("Request to send otp for {}", auth.authId());
     service.sendOtp(auth.authId());
@@ -57,7 +59,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   }
 
   @PostMapping("/reset")
-  public ResponseEntity<RestResponse<String>> resetPassword(@RequestBody @Validated R resetDto)
+  public ResponseEntity<RestResponse<String>> resetPassword(@RequestBody @Valid R resetDto)
     throws EntityInvalidException {
     log.info("Request to reset password for {}", resetDto.authId());
     service.resetPassword(resetDto.authId(), resetDto.otp(), resetDto.passcode());
@@ -65,13 +67,17 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   }
 
   @PostMapping("/validate-token")
-  public ResponseEntity<RestResponse<DTO>> validateToken(@Authenticated T user) {
+  @Authenticated
+  public ResponseEntity<RestResponse<DTO>> validateToken() {
+    T user = ThreadContext.getCurrentUser();
     log.info("Validating token for {}", user.authId());
     return RestUtil.successResponse(mapper.toDto(user));
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<?> logout(@Authenticated(required = false) T user, String token) {
+  @Authenticated(required = false)
+  public ResponseEntity<?> logout(String token) {
+    T user = ThreadContext.getCurrentUser();
     if (user != null) {
       log.info("Request to logout for {}", user.authId());
       service.logout(user, token);

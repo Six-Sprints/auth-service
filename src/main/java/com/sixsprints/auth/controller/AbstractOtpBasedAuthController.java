@@ -1,7 +1,8 @@
 package com.sixsprints.auth.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -32,7 +33,7 @@ public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthentic
   }
 
   @PostMapping("/send-otp-login")
-  public ResponseEntity<RestResponse<DTO>> sendOtpFrAuth(@RequestBody @Validated OtpLoginDto auth)
+  public ResponseEntity<RestResponse<DTO>> sendOtpFrAuth(@RequestBody @Valid OtpLoginDto auth)
     throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to send otp for {}", auth.authId());
     DTO user = service.sendOtpForAuth(auth.authId());
@@ -40,7 +41,7 @@ public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthentic
   }
 
   @Override
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Validated OtpLoginDto authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid OtpLoginDto authDto)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     return super.login(authDto);
   }

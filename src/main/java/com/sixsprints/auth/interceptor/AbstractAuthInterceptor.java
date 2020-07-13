@@ -1,70 +1,66 @@
-package com.sixsprints.auth.annotation;
+package com.sixsprints.auth.interceptor;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.MethodParameter;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.util.StringUtils;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import com.sixsprints.auth.annotation.Authenticated;
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
 import com.sixsprints.auth.domain.Role;
 import com.sixsprints.auth.enums.AccessPermission;
 import com.sixsprints.auth.service.RoleService;
 import com.sixsprints.auth.util.PermissionUtil;
+import com.sixsprints.auth.util.ThreadContext;
 import com.sixsprints.core.exception.BaseException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.GenericCrudService;
 import com.sixsprints.core.utils.AuthUtil;
 
-public abstract class AbstractAuthenticatedArgumentResolver<T extends AbstractAuthenticableEntity>
-  implements HandlerMethodArgumentResolver {
+public abstract class AbstractAuthInterceptor<T extends AbstractAuthenticableEntity> extends HandlerInterceptorAdapter {
 
   private GenericCrudService<T> userService;
-
-  public AbstractAuthenticatedArgumentResolver(GenericCrudService<T> userService) {
-    this.userService = userService;
-  }
 
   @Autowired
   private RoleService roleService;
 
-  @Override
-  public T resolveArgument(MethodParameter param, ModelAndViewContainer mavContainer, NativeWebRequest request,
-    WebDataBinderFactory binderFactory) throws Exception {
-    Annotation[] paramAnns = param.getParameterAnnotations();
-    for (Annotation annotation : paramAnns) {
-      if (Authenticated.class.isInstance(annotation)) {
-        Authenticated authAnnotation = (Authenticated) annotation;
-        HttpServletRequest httprequest = (HttpServletRequest) request.getNativeRequest();
-        String token = httprequest.getHeader(auhtTokenKey());
-        if (StringUtils.isEmpty(token)) {
-          token = httprequest.getParameter(auhtTokenKey());
-        }
-        T user = checkUser(authAnnotation, token);
-        postProcessor(user);
-        return user;
-      }
-    }
-    return null;
+  public AbstractAuthInterceptor(GenericCrudService<T> userService) {
+    this.userService = userService;
   }
 
   @Override
-  public boolean supportsParameter(MethodParameter parameter) {
-    return parameter.hasParameterAnnotation(Authenticated.class);
+  public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+    Object handler) throws Exception {
+    if (!(handler instanceof HandlerMethod)) {
+      return true;
+    }
+    Method method = ((HandlerMethod) handler).getMethod();
+    if (!(method.getDeclaringClass().isAnnotationPresent(Authenticated.class)
+      || method.isAnnotationPresent(Authenticated.class))) {
+      return true;
+    }
+    Authenticated annotation = method.getAnnotation(Authenticated.class);
+    String token = httpServletRequest.getHeader(auhtTokenKey());
+    if (StringUtils.isEmpty(token)) {
+      token = httpServletRequest.getParameter(auhtTokenKey());
+    }
+    T user = checkUser(annotation, token);
+    postProcessor(user);
+    return true;
   }
 
   protected abstract String auhtTokenKey();
 
   protected void postProcessor(T user) {
+    ThreadContext.setCurrentUser(user);
   }
 
   protected String unauthorisedErrorMessage(T user) {

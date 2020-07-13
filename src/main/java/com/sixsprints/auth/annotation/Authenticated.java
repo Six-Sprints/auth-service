@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 import com.sixsprints.auth.enums.AccessPermission;
 
-@Target(ElementType.PARAMETER)
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Authenticated {

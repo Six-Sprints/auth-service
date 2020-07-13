@@ -19,7 +19,7 @@ import com.sixsprints.auth.domain.Otp;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.OtpLoginDto;
 import com.sixsprints.auth.mock.dto.UserDto;
-import com.sixsprints.auth.mock.service.AuthenticatedArgumentResolver;
+import com.sixsprints.auth.mock.service.AuthInterceptor;
 import com.sixsprints.auth.mock.service.UserService;
 import com.sixsprints.auth.service.OtpService;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
@@ -176,7 +176,7 @@ public class UserAuthControllerTest extends BaseControllerTest {
     String mobileNumber = "9810306710";
     AuthResponseDto<UserDto> user = saveUser(mobileNumber);
     mvc.perform(
-      MockMvcRequestBuilders.post("/api/v1/auth/logout").header(AuthenticatedArgumentResolver.TOKEN, user.getToken()))
+      MockMvcRequestBuilders.post("/api/v1/auth/logout").header(AuthInterceptor.TOKEN, user.getToken()))
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)));
@@ -187,7 +187,7 @@ public class UserAuthControllerTest extends BaseControllerTest {
     String mobileNumber = "9810306710";
     saveUser(mobileNumber);
     mvc.perform(
-      MockMvcRequestBuilders.post("/api/v1/auth/logout").header(AuthenticatedArgumentResolver.TOKEN, "DUMMY_TOKEN"))
+      MockMvcRequestBuilders.post("/api/v1/auth/logout").header(AuthInterceptor.TOKEN, "DUMMY_TOKEN"))
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)));
@@ -205,7 +205,7 @@ public class UserAuthControllerTest extends BaseControllerTest {
     AuthResponseDto<UserDto> user = saveUser(mobileNumber);
     mvc.perform(
       MockMvcRequestBuilders.post("/api/v1/auth/validate-token")
-        .header(AuthenticatedArgumentResolver.TOKEN, user.getToken()).contentType(MediaType.APPLICATION_JSON))
+        .header(AuthInterceptor.TOKEN, user.getToken()).contentType(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)))
@@ -220,7 +220,7 @@ public class UserAuthControllerTest extends BaseControllerTest {
     saveUser(mobileNumber);
     mvc.perform(
       MockMvcRequestBuilders.post("/api/v1/auth/validate-token")
-        .header(AuthenticatedArgumentResolver.TOKEN, "DUMMY_TOKEN").contentType(MediaType.APPLICATION_JSON))
+        .header(AuthInterceptor.TOKEN, "DUMMY_TOKEN").contentType(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.status().isForbidden())
       .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.FALSE)))
