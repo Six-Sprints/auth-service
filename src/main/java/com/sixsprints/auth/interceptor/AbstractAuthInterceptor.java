@@ -48,6 +48,9 @@ public abstract class AbstractAuthInterceptor<T extends AbstractAuthenticableEnt
       return true;
     }
     Authenticated annotation = method.getAnnotation(Authenticated.class);
+    if (annotation == null) {
+      annotation = method.getDeclaringClass().getAnnotation(Authenticated.class);
+    }
     String token = httpServletRequest.getHeader(auhtTokenKey());
     if (StringUtils.isEmpty(token)) {
       token = httpServletRequest.getParameter(auhtTokenKey());
