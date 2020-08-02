@@ -1,6 +1,7 @@
 package com.sixsprints.auth.util;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.sixsprints.auth.domain.Role;
 import com.sixsprints.auth.dto.PermissionDto;
@@ -31,8 +32,12 @@ public class PermissionUtil {
     AccessPermission accessPermission) {
     return (ANY.equals(entityPermission) || ANY.equals(dto.getEntityPermission())
       || entityPermission.equals(dto.getEntityPermission()))
-      && (AccessPermission.ANY.equals(accessPermission) || dto.getAccessPermissions().contains(AccessPermission.ANY)
-        || dto.getAccessPermissions().contains(accessPermission));
+      && (AccessPermission.ANY.equals(accessPermission) || mapToAccessPermissions(dto).contains(AccessPermission.ANY)
+        || mapToAccessPermissions(dto).contains(accessPermission));
+  }
+
+  private static List<AccessPermission> mapToAccessPermissions(PermissionDto dto) {
+    return dto.getAccesses().stream().map(acc -> acc.getAccessPermission()).collect(Collectors.toList());
   }
 
   private static List<PermissionDto> allPermissions(Role role) {

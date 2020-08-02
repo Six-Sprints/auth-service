@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.springframework.util.Assert;
 
 import com.sixsprints.auth.domain.Role;
+import com.sixsprints.auth.dto.AccessDto;
 import com.sixsprints.auth.dto.PermissionDto;
 import com.sixsprints.core.enums.AccessPermission;
 
@@ -43,10 +44,12 @@ public class PermissionUtilTest {
 
     permissions.add(
       PermissionDto.builder().entityPermission(USER)
-        .accessPermission(AccessPermission.CREATE).accessPermission(AccessPermission.READ).build());
+        .access(AccessDto.builder().accessPermission(AccessPermission.CREATE).build())
+        .access(AccessDto.builder().accessPermission(AccessPermission.READ).build()).build());
 
     permissions.add(
-      PermissionDto.builder().entityPermission(COMPANY).accessPermission(AccessPermission.ANY).build());
+      PermissionDto.builder().entityPermission(COMPANY).access(
+        AccessDto.builder().accessPermission(AccessPermission.ANY).build()).build());
 
     return Role.builder().name("R1").permissions(permissions).build();
   }

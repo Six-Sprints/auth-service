@@ -1,25 +1,25 @@
 package com.sixsprints.auth.dto;
 
 import java.io.Serializable;
-import java.util.List;
+
+import com.sixsprints.core.enums.AccessPermission;
+import com.sixsprints.core.enums.Restriction;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionDto implements Serializable {
+public class AccessDto implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private String entityPermission;
+  private AccessPermission accessPermission;
 
-  @Singular
-  private List<AccessDto> accesses;
+  private Restriction restriction;
 
 }
