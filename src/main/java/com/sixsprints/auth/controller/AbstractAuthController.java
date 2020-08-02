@@ -7,18 +7,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.sixsprints.auth.annotation.Authenticated;
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.auth.dto.ResetPasscode;
 import com.sixsprints.auth.service.AuthService;
-import com.sixsprints.auth.util.ThreadContext;
+import com.sixsprints.core.annotation.Authenticated;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.transformer.GenericTransformer;
+import com.sixsprints.core.utils.ApplicationContext;
 import com.sixsprints.core.utils.RestResponse;
 import com.sixsprints.core.utils.RestUtil;
 
@@ -66,18 +66,18 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
     return RestUtil.successResponse("Reset Done", HttpStatus.OK);
   }
 
-  @PostMapping("/validate-token")
   @Authenticated
+  @PostMapping("/validate-token")
   public ResponseEntity<RestResponse<DTO>> validateToken() {
-    T user = ThreadContext.getCurrentUser();
+    T user = ApplicationContext.getCurrentUser();
     log.info("Validating token for {}", user.authId());
     return RestUtil.successResponse(mapper.toDto(user));
   }
 
-  @PostMapping("/logout")
   @Authenticated(required = false)
+  @PostMapping("/logout")
   public ResponseEntity<?> logout(String token) {
-    T user = ThreadContext.getCurrentUser();
+    T user = ApplicationContext.getCurrentUser();
     if (user != null) {
       log.info("Request to logout for {}", user.authId());
       service.logout(user, token);

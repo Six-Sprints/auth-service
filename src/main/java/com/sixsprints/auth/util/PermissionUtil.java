@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.sixsprints.auth.domain.Role;
 import com.sixsprints.auth.dto.PermissionDto;
-import com.sixsprints.auth.enums.AccessPermission;
+import com.sixsprints.core.enums.AccessPermission;
 
 public class PermissionUtil {
 
