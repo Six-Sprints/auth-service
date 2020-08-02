@@ -2,6 +2,7 @@ package com.sixsprints.auth.interceptor;
 
 import java.util.List;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -19,6 +20,7 @@ import com.sixsprints.core.service.GenericCrudService;
 public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthenticableEntity>
   extends AbstractAuthenticationInterceptor<T> {
 
+  private static final String USER = "user";
   @Autowired
   private RoleService roleService;
 
@@ -48,6 +50,12 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
     if (!CollectionUtils.isEmpty(invalidTokens) && invalidTokens.contains(token)) {
       throwException(authAnnotation, tokenInvalidErrorMessage());
     }
+  }
+
+  @Override
+  protected void postProcessor(T user) {
+    super.postProcessor(user);
+    MDC.put(USER, user.authId());
   }
 
 }
