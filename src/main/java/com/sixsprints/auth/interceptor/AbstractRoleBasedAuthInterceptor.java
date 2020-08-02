@@ -55,7 +55,9 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
   @Override
   protected void postProcessor(T user) {
     super.postProcessor(user);
-    MDC.put(USER, user.authId());
+    if (user != null) {
+      MDC.put(USER, user.authId());
+    }
   }
 
 }
