@@ -28,7 +28,7 @@ public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticabl
     if (user == null) {
       throw notFoundException(authenticable.authId());
     }
-    validateOtp(authenticable.authId(), authenticable.passcode());
+    validateOtp(user.authId(), authenticable.passcode());
     return generateToken(user);
   }
 
@@ -40,7 +40,7 @@ public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticabl
       user = newUser(authId);
       create(user);
     }
-    super.sendOtp(authId);
+    super.sendOtp(user.authId());
     return mapper.toDto(user);
   }
 
