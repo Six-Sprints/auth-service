@@ -3,7 +3,7 @@ package com.sixsprints.auth.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
 
 import com.sixsprints.auth.domain.Role;

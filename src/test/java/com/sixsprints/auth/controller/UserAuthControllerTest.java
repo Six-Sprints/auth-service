@@ -4,8 +4,8 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -43,7 +43,7 @@ public class UserAuthControllerTest extends BaseControllerTest {
   @Autowired
   private UserService userService;
 
-  @Before
+  @BeforeEach
   public void mockServices() {
     @SuppressWarnings("unchecked")
     Future<String> future = Mockito.mock(Future.class);
