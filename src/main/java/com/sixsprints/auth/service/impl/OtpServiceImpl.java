@@ -1,4 +1,4 @@
-package com.sixsprints.auth.service.Impl;
+package com.sixsprints.auth.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

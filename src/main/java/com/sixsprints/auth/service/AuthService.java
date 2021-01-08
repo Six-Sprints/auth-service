@@ -21,7 +21,8 @@ public interface AuthService<T extends AbstractAuthenticableEntity, DTO> extends
 
   Otp validateOtp(String authId, String otp) throws EntityInvalidException;
 
-  void resetPassword(String authId, String otp, String newPassword) throws EntityInvalidException;
+  void resetPassword(String authId, String otp, String newPassword)
+    throws EntityInvalidException, EntityNotFoundException;
 
   void logout(T user, String token);
 

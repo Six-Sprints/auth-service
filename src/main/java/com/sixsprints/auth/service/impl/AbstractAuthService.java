@@ -1,4 +1,4 @@
-package com.sixsprints.auth.service.Impl;
+package com.sixsprints.auth.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,9 +76,13 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
-  public void resetPassword(String authId, String otp, String newPassword) throws EntityInvalidException {
+  public void resetPassword(String authId, String otp, String newPassword)
+    throws EntityInvalidException, EntityNotFoundException {
     Otp otpFromDb = validateOtp(authId, otp);
     T user = findByAuthId(authId);
+    if (user == null) {
+      throw notFoundException(authId);
+    }
     user.setPassword(EncryptionUtil.encrypt(newPassword));
     save(user);
     otpService.delete(otpFromDb);

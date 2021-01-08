@@ -12,7 +12,7 @@ import com.sixsprints.auth.mock.dto.UserDto;
 import com.sixsprints.auth.mock.repository.UserRepository;
 import com.sixsprints.auth.mock.transformer.UserMapper;
 import com.sixsprints.auth.service.OtpBasedAuthService;
-import com.sixsprints.auth.service.Impl.AbstractOtpBasedAuthService;
+import com.sixsprints.auth.service.impl.AbstractOtpBasedAuthService;
 import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.dto.MetaData;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;

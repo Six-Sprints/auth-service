@@ -60,7 +60,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
 
   @PostMapping("/reset")
   public ResponseEntity<RestResponse<String>> resetPassword(@RequestBody @Valid R resetDto)
-    throws EntityInvalidException {
+    throws EntityInvalidException, EntityNotFoundException {
     log.info("Request to reset password for {}", resetDto.authId());
     service.resetPassword(resetDto.authId(), resetDto.otp(), resetDto.passcode());
     return RestUtil.successResponse("Reset Done", HttpStatus.OK);

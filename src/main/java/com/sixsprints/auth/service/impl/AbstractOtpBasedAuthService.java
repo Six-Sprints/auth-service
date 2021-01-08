@@ -1,4 +1,4 @@
-package com.sixsprints.auth.service.Impl;
+package com.sixsprints.auth.service.impl;
 
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
 import com.sixsprints.auth.dto.AuthResponseDto;
