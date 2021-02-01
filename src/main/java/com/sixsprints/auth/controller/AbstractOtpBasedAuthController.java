@@ -15,7 +15,6 @@ import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
-import com.sixsprints.core.transformer.GenericTransformer;
 import com.sixsprints.core.utils.RestResponse;
 import com.sixsprints.core.utils.RestUtil;
 
@@ -27,8 +26,8 @@ public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthentic
 
   private final OtpBasedAuthService<T, DTO> service;
 
-  public AbstractOtpBasedAuthController(OtpBasedAuthService<T, DTO> service, GenericTransformer<T, DTO> mapper) {
-    super(service, mapper);
+  public AbstractOtpBasedAuthController(OtpBasedAuthService<T, DTO> service) {
+    super(service);
     this.service = service;
   }
 

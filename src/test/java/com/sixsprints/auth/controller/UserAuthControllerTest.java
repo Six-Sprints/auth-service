@@ -209,8 +209,8 @@ public class UserAuthControllerTest extends BaseControllerTest {
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.data.mobileNumber", CoreMatchers.is(mobileNumber)))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.data.slug", CoreMatchers.notNullValue()));
+      .andExpect(MockMvcResultMatchers.jsonPath("$.data.data.mobileNumber", CoreMatchers.is(mobileNumber)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.data.data.slug", CoreMatchers.notNullValue()));
 
   }
 

@@ -7,14 +7,13 @@ import com.sixsprints.auth.controller.AbstractOtpBasedAuthController;
 import com.sixsprints.auth.mock.domain.User;
 import com.sixsprints.auth.mock.dto.UserDto;
 import com.sixsprints.auth.mock.service.UserService;
-import com.sixsprints.auth.mock.transformer.UserMapper;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth")
 public class UserAuthController extends AbstractOtpBasedAuthController<User, UserDto> {
 
-  public UserAuthController(UserService service, UserMapper mapper) {
-    super(service, mapper);
+  public UserAuthController(UserService service) {
+    super(service);
   }
 
 }

@@ -97,6 +97,11 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
+  public AuthResponseDto<DTO> validateToken(T user) {
+    return generateToken(user);
+  }
+
+  @Override
   public void logout(T user, String token) {
     if (StringUtils.isEmpty(token)) {
       return;

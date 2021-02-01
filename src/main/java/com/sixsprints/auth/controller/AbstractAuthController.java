@@ -17,7 +17,6 @@ import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
-import com.sixsprints.core.transformer.GenericTransformer;
 import com.sixsprints.core.utils.ApplicationContext;
 import com.sixsprints.core.utils.RestResponse;
 import com.sixsprints.core.utils.RestUtil;
@@ -29,11 +28,8 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
 
   private final AuthService<T, DTO> service;
 
-  private final GenericTransformer<T, DTO> mapper;
-
-  public AbstractAuthController(AuthService<T, DTO> service, GenericTransformer<T, DTO> mapper) {
+  public AbstractAuthController(AuthService<T, DTO> service) {
     this.service = service;
-    this.mapper = mapper;
   }
 
   @PostMapping("/register")
@@ -68,10 +64,10 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
 
   @Authenticated
   @PostMapping("/validate-token")
-  public ResponseEntity<RestResponse<DTO>> validateToken() {
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> validateToken() {
     T user = ApplicationContext.getCurrentUser();
     log.info("Validating token for {}", user.authId());
-    return RestUtil.successResponse(mapper.toDto(user));
+    return RestUtil.successResponse(service.validateToken(user));
   }
 
   @Authenticated(required = false)
