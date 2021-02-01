@@ -9,10 +9,12 @@ import org.springframework.util.CollectionUtils;
 
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
 import com.sixsprints.auth.domain.Otp;
+import com.sixsprints.auth.domain.Role;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.auth.service.AuthService;
 import com.sixsprints.auth.service.OtpService;
+import com.sixsprints.auth.service.RoleService;
 import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
@@ -26,6 +28,9 @@ import com.sixsprints.core.utils.EncryptionUtil;
 import com.sixsprints.notification.dto.MessageDto;
 import com.sixsprints.notification.service.NotificationService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO> extends AbstractCrudService<T>
   implements AuthService<T, DTO> {
 
@@ -35,6 +40,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   @Autowired
   private OtpService otpService;
+
+  @Autowired
+  private RoleService roleService;
 
   public AbstractAuthService(GenericTransformer<T, DTO> mapper, NotificationService notificationService) {
     this.mapper = mapper;
@@ -126,9 +134,29 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   protected AuthResponseDto<DTO> generateToken(T domain) {
-    return AuthResponseDto.<DTO>builder().token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
+
+    String roleSlug = domain.getRoleSlug();
+    Role role = fetchRole(roleSlug);
+
+    return AuthResponseDto.<DTO>builder()
+      .token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
       .data(mapper.toDto(domain))
+      .roleName(role.getName())
+      .permissions(role.getPermissions())
       .build();
+  }
+
+  private Role fetchRole(String roleSlug) {
+    Role role = Role.builder().build();
+    try {
+      if (StringUtils.isNotBlank(roleSlug)) {
+        role = roleService.findBySlug(roleSlug);
+      }
+    } catch (EntityNotFoundException ex) {
+      log.error("Role not found with slug = {}", roleSlug);
+      log.error(ex.getMessage(), ex);
+    }
+    return role == null ? Role.builder().build() : role;
   }
 
   protected int tokenExpiryInDays() {
