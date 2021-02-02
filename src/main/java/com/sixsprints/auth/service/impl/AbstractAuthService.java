@@ -21,7 +21,7 @@ import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.AbstractCrudService;
-import com.sixsprints.core.transformer.GenericTransformer;
+import com.sixsprints.core.transformer.GenericMapper;
 import com.sixsprints.core.utils.AppConstants;
 import com.sixsprints.core.utils.AuthUtil;
 import com.sixsprints.core.utils.EncryptionUtil;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO> extends AbstractCrudService<T>
   implements AuthService<T, DTO> {
 
-  private final GenericTransformer<T, DTO> mapper;
+  private final GenericMapper<T, DTO> mapper;
 
   private final NotificationService notificationService;
 
@@ -44,7 +44,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   @Autowired
   private RoleService roleService;
 
-  public AbstractAuthService(GenericTransformer<T, DTO> mapper, NotificationService notificationService) {
+  public AbstractAuthService(GenericMapper<T, DTO> mapper, NotificationService notificationService) {
     this.mapper = mapper;
     this.notificationService = notificationService;
   }

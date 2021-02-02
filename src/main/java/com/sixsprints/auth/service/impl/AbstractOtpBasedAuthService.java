@@ -8,15 +8,15 @@ import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
-import com.sixsprints.core.transformer.GenericTransformer;
+import com.sixsprints.core.transformer.GenericMapper;
 import com.sixsprints.notification.service.NotificationService;
 
 public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticableEntity, DTO>
   extends AbstractAuthService<T, DTO> implements OtpBasedAuthService<T, DTO> {
 
-  private final GenericTransformer<T, DTO> mapper;
+  private final GenericMapper<T, DTO> mapper;
 
-  public AbstractOtpBasedAuthService(GenericTransformer<T, DTO> mapper, NotificationService notificationService) {
+  public AbstractOtpBasedAuthService(GenericMapper<T, DTO> mapper, NotificationService notificationService) {
     super(mapper, notificationService);
     this.mapper = mapper;
   }

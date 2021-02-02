@@ -38,11 +38,6 @@ public class UserService extends AbstractOtpBasedAuthService<User, UserDto>
   }
 
   @Override
-  protected boolean isInvalid(User domain) {
-    return domain == null || StringUtils.isBlank(domain.getEmail());
-  }
-
-  @Override
   protected User findDuplicate(User entity) {
     return userRepository.findByEmailOrMobileNumber(entity.getEmail(), entity.getMobileNumber());
   }

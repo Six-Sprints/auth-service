@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 
 import com.sixsprints.auth.mock.domain.User;
 import com.sixsprints.auth.mock.dto.UserDto;
-import com.sixsprints.core.transformer.GenericTransformer;
+import com.sixsprints.core.transformer.GenericMapper;
 
 @Service
-public class UserMapper extends GenericTransformer<User, UserDto> {
+public class UserMapper extends GenericMapper<User, UserDto> {
 
   @Override
   public UserDto toDto(User user) {

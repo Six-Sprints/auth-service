@@ -1,5 +1,8 @@
 package com.sixsprints.auth.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,8 +39,17 @@ public class RoleServiceImpl extends AbstractCrudService<Role> implements RoleSe
   }
 
   @Override
-  protected boolean isInvalid(Role role) {
-    return role == null || StringUtils.isBlank(role.getName());
+  protected List<String> checkValidity(Role role) {
+
+    List<String> errors = new ArrayList<>();
+    if (role == null || StringUtils.isBlank(role.getName())) {
+      errors.add(roleNameInvalidError());
+    }
+    return errors;
+  }
+
+  private String roleNameInvalidError() {
+    return "Role name cannot be blank! Please provide a role name";
   }
 
   @Override
