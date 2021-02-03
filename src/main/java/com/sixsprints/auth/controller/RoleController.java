@@ -2,13 +2,13 @@ package com.sixsprints.auth.controller;
 
 import com.sixsprints.auth.domain.Role;
 import com.sixsprints.auth.dto.RoleDto;
-import com.sixsprints.auth.mapper.RoleMapper;
 import com.sixsprints.auth.service.RoleService;
 import com.sixsprints.core.controller.AbstractCrudController;
+import com.sixsprints.core.transformer.GenericMapper;
 
 public abstract class RoleController extends AbstractCrudController<Role, RoleDto> {
 
-  public RoleController(RoleService service, RoleMapper mapper) {
+  public RoleController(RoleService service, GenericMapper<Role, RoleDto> mapper) {
     super(service, mapper);
   }
 
