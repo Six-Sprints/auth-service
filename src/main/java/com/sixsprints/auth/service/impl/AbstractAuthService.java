@@ -88,12 +88,6 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   @Transactional
   public void resetPassword(String authId, String otp, String newPassword)
     throws EntityInvalidException, EntityNotFoundException {
-    T user = doResetPassword(authId, otp, newPassword);
-    save(user);
-  }
-
-  protected T doResetPassword(String authId, String otp, String newPassword)
-    throws EntityInvalidException, EntityNotFoundException {
     Otp otpFromDb = validateOtp(authId, otp);
     T user = findByAuthId(authId);
     if (user == null) {
@@ -101,7 +95,12 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
     }
     user.setPassword(EncryptionUtil.encrypt(newPassword));
     otpService.delete(otpFromDb);
-    return user;
+    preResetPassword(otpFromDb, user);
+    save(user);
+  }
+
+  protected void preResetPassword(Otp otpFromDb, T user) {
+
   }
 
   @Override
