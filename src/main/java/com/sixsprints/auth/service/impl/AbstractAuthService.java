@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
@@ -84,7 +85,14 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
+  @Transactional
   public void resetPassword(String authId, String otp, String newPassword)
+    throws EntityInvalidException, EntityNotFoundException {
+    T user = doResetPassword(authId, otp, newPassword);
+    save(user);
+  }
+
+  protected T doResetPassword(String authId, String otp, String newPassword)
     throws EntityInvalidException, EntityNotFoundException {
     Otp otpFromDb = validateOtp(authId, otp);
     T user = findByAuthId(authId);
@@ -92,8 +100,8 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
       throw notFoundException(authId);
     }
     user.setPassword(EncryptionUtil.encrypt(newPassword));
-    save(user);
     otpService.delete(otpFromDb);
+    return user;
   }
 
   @Override
