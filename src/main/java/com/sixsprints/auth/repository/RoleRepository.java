@@ -8,6 +8,6 @@ import com.sixsprints.core.repository.GenericRepository;
 @Repository
 public interface RoleRepository extends GenericRepository<Role> {
 
-  Role findByName(String name);
+  Role findByNameIgnoreCase(String name);
 
 }

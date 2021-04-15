@@ -54,7 +54,7 @@ public class RoleServiceImpl extends AbstractCrudService<Role> implements RoleSe
 
   @Override
   public Role findByName(String name) {
-    return roleRepository.findByName(name);
+    return roleRepository.findByNameIgnoreCase(name);
   }
 
 }
