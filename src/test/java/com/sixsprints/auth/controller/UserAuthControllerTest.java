@@ -50,7 +50,7 @@ public class UserAuthControllerTest extends BaseControllerTest {
     Mockito.when(notificationService.sendMessage(Mockito.any())).thenReturn(future);
 
     Mockito.when(otpService.generate(Mockito.anyString(), Mockito.anyInt())).thenAnswer(inv -> {
-      String num = inv.getArgument(0);
+      String num = inv.getArgument(0); 
       return Otp.builder().authId(num).otp("1234").build();
     });
 
