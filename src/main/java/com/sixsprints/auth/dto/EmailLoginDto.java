@@ -10,20 +10,20 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "otp")
-public class OtpLoginDto implements Authenticable {
+@ToString(exclude = "password")
+public class EmailLoginDto implements Authenticable {
 
-  private String mobileNumber;
+  private String email;
 
-  private String otp;
+  private String password;
 
   @Override
   public String authId() {
-    return getMobileNumber();
+    return email;
   }
 
   @Override
   public String passcode() {
-    return getOtp();
+    return password;
   }
 }
