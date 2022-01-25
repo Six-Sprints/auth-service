@@ -29,7 +29,8 @@ public class RoleServiceImpl extends AbstractCrudService<Role> implements RoleSe
   @Override
   protected MetaData<Role> metaData() {
     return MetaData.<Role>builder()
-      .classType(Role.class).dtoClassType(RoleDto.class)
+      .classType(Role.class)
+      .crudDtoClassType(RoleDto.class)
       .build();
   }
 

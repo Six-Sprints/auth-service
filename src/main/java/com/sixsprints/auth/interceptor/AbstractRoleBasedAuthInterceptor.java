@@ -21,6 +21,7 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
   extends AbstractAuthenticationInterceptor<T> {
 
   private static final String USER = "user";
+  
   @Autowired
   private RoleService roleService;
 

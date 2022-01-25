@@ -24,33 +24,33 @@ import com.sixsprints.core.utils.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, DTO, L extends Authenticable, R extends ResetPasscode> {
+public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, CD, L extends Authenticable, R extends ResetPasscode> {
 
-  private final AuthService<T, DTO> service;
+  private final AuthService<T, CD> authService;
 
-  public AbstractAuthController(AuthService<T, DTO> service) {
-    this.service = service;
+  public AbstractAuthController(AuthService<T, CD> service) {
+    this.authService = service;
   }
 
   @PostMapping("/register")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Valid DTO dto)
+  public ResponseEntity<RestResponse<AuthResponseDto<CD>>> register(@RequestBody @Valid CD dto)
     throws EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to register {}", dto);
-    return RestUtil.successResponse(service.register(dto), HttpStatus.CREATED);
+    return RestUtil.successResponse(authService.register(dto), HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid L authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<CD>>> login(@RequestBody @Valid L authDto)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     log.info("Request to login {}", authDto.authId());
-    return RestUtil.successResponse(service.login(authDto));
+    return RestUtil.successResponse(authService.login(authDto));
   }
 
   @PostMapping("/send-otp")
   public ResponseEntity<RestResponse<String>> sendOtp(@RequestBody @Valid L auth)
     throws EntityNotFoundException {
     log.info("Request to send otp for {}", auth.authId());
-    service.sendOtp(auth.authId());
+    authService.sendOtp(auth.authId());
     return RestUtil.successResponse("OTP Sent Successfully", HttpStatus.OK);
   }
 
@@ -58,16 +58,16 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
   public ResponseEntity<RestResponse<String>> resetPassword(@RequestBody @Valid R resetDto)
     throws EntityInvalidException, EntityNotFoundException {
     log.info("Request to reset password for {}", resetDto.authId());
-    service.resetPassword(resetDto.authId(), resetDto.otp(), resetDto.passcode());
+    authService.resetPassword(resetDto.authId(), resetDto.otp(), resetDto.passcode());
     return RestUtil.successResponse("Reset Done", HttpStatus.OK);
   }
 
   @Authenticated
   @PostMapping("/validate-token")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> validateToken() {
+  public ResponseEntity<RestResponse<AuthResponseDto<CD>>> validateToken() {
     T user = ApplicationContext.getCurrentUser();
     log.info("Validating token for {}", user.authId());
-    return RestUtil.successResponse(service.validateToken(user));
+    return RestUtil.successResponse(authService.validateToken(user));
   }
 
   @Authenticated(required = false)
@@ -76,7 +76,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
     T user = ApplicationContext.getCurrentUser();
     if (user != null) {
       log.info("Request to logout for {}", user.authId());
-      service.logout(user, token);
+      authService.logout(user, token);
     }
     return RestUtil.successResponse(null);
   }

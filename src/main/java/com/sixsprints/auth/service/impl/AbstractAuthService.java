@@ -32,10 +32,10 @@ import com.sixsprints.notification.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO> extends AbstractCrudService<T>
-  implements AuthService<T, DTO> {
+public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, CD> extends AbstractCrudService<T>
+  implements AuthService<T, CD> {
 
-  private final GenericMapper<T, DTO> mapper;
+  private final GenericMapper<T, CD> mapper;
 
   private final NotificationService notificationService;
 
@@ -45,18 +45,18 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   @Autowired
   private RoleService roleService;
 
-  public AbstractAuthService(GenericMapper<T, DTO> mapper, NotificationService notificationService) {
+  public AbstractAuthService(GenericMapper<T, CD> mapper, NotificationService notificationService) {
     this.mapper = mapper;
     this.notificationService = notificationService;
   }
 
   @Override
-  public AuthResponseDto<DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException {
+  public AuthResponseDto<CD> register(CD dto) throws EntityAlreadyExistsException, EntityInvalidException {
     return generateToken(create(mapper.toDomain(dto)));
   }
 
   @Override
-  public AuthResponseDto<DTO> login(Authenticable authenticable)
+  public AuthResponseDto<CD> login(Authenticable authenticable)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     T user = findByAuthId(authenticable.authId());
     if (user == null) {
@@ -104,7 +104,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
-  public AuthResponseDto<DTO> validateToken(T user) {
+  public AuthResponseDto<CD> validateToken(T user) {
     return generateToken(user);
   }
 
@@ -145,12 +145,12 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
       .arg(authenticable.authId()).data(authenticable.authId()).build();
   }
 
-  protected AuthResponseDto<DTO> generateToken(T domain) {
+  protected AuthResponseDto<CD> generateToken(T domain) {
 
     String roleSlug = domain.getRoleSlug();
     Role role = fetchRole(roleSlug);
 
-    return AuthResponseDto.<DTO>builder()
+    return AuthResponseDto.<CD>builder()
       .token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
       .data(mapper.toDto(domain))
       .roleName(role.getName())
