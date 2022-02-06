@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sixsprints.auth.mock.domain.User;
@@ -18,7 +17,6 @@ import com.sixsprints.core.dto.MetaData;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.repository.GenericRepository;
-import com.sixsprints.core.utils.EncryptionUtil;
 import com.sixsprints.notification.service.NotificationService;
 
 @Service
@@ -40,14 +38,6 @@ public class UserService extends AbstractOtpBasedAuthService<User, UserDto>
   @Override
   protected User findDuplicate(User entity) {
     return userRepository.findByEmailOrMobileNumber(entity.getEmail(), entity.getMobileNumber());
-  }
-
-  @Override
-  protected void preCreate(User user) {
-    if (StringUtils.isBlank(user.getPassword())) {
-      user.setPassword(EncryptionUtil.encrypt(user.getEmail()));
-    } else
-      user.setPassword(EncryptionUtil.encrypt(user.getPassword()));
   }
 
   @Override

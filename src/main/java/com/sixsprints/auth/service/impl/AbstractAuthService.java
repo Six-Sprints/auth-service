@@ -51,6 +51,14 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
+  protected void preCreate(T user) {
+    if (StringUtils.isBlank(user.getPassword())) {
+      user.setPassword(EncryptionUtil.encrypt(user.authId()));
+    } else
+      user.setPassword(EncryptionUtil.encrypt(user.getPassword()));
+  }
+
+  @Override
   public AuthResponseDto<CD> register(CD dto) throws EntityAlreadyExistsException, EntityInvalidException {
     return generateToken(create(mapper.toDomain(dto)));
   }
