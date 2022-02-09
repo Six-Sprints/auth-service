@@ -24,23 +24,23 @@ import com.sixsprints.core.utils.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, CD, L extends Authenticable, R extends ResetPasscode> {
+public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, DTO, L extends Authenticable, R extends ResetPasscode> {
 
-  private final AuthService<T, CD> authService;
+  private final AuthService<T, DTO> authService;
 
-  public AbstractAuthController(AuthService<T, CD> service) {
+  public AbstractAuthController(AuthService<T, DTO> service) {
     this.authService = service;
   }
 
   @PostMapping("/register")
-  public ResponseEntity<RestResponse<AuthResponseDto<CD>>> register(@RequestBody @Valid CD dto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Valid DTO dto)
     throws EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to register {}", dto);
     return RestUtil.successResponse(authService.register(dto), HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<RestResponse<AuthResponseDto<CD>>> login(@RequestBody @Valid L authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid L authDto)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     log.info("Request to login {}", authDto.authId());
     return RestUtil.successResponse(authService.login(authDto));
@@ -64,7 +64,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
 
   @Authenticated
   @PostMapping("/validate-token")
-  public ResponseEntity<RestResponse<AuthResponseDto<CD>>> validateToken() {
+  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> validateToken() {
     T user = ApplicationContext.getCurrentUser();
     log.info("Validating token for {}", user.authId());
     return RestUtil.successResponse(authService.validateToken(user));
