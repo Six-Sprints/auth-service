@@ -1,5 +1,6 @@
 package com.sixsprints.auth.mock.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -46,7 +47,7 @@ public class UserService extends AbstractOtpBasedAuthService<User, UserDto>
   }
 
   @Override
-  protected EntityInvalidException invalidException(User domain) {
+  protected EntityInvalidException invalidException(User domain, List<String> errors) {
     return EntityInvalidException.childBuilder().error(Messages.USER_IS_INVALID).data(domain).build();
   }
 

@@ -15,7 +15,7 @@ public class AuthInterceptor extends AbstractRoleBasedAuthInterceptor<User> {
   public static final String TOKEN = "X-AUTH-TOKEN";
 
   @Override
-  protected String auhtTokenKey() {
+  protected String authTokenKey() {
     return TOKEN;
   }
 
