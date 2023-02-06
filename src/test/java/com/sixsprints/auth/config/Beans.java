@@ -14,13 +14,13 @@ public class Beans extends ParentBeans {
 
   @Bean
   @Primary
-  public NotificationService notificationService() {
+  protected NotificationService notificationService() {
     return Mockito.mock(NotificationService.class);
   }
 
   @Bean
   @Primary
-  public OtpService otpService() {
+  protected OtpService otpService() {
     return Mockito.mock(OtpService.class);
   }
 

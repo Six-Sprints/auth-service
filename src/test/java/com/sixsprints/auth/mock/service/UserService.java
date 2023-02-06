@@ -3,8 +3,7 @@ package com.sixsprints.auth.mock.service;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Resource;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sixsprints.auth.mock.domain.User;
@@ -28,7 +27,7 @@ public class UserService extends AbstractOtpBasedAuthService<User, UserDto>
     super(mapper, notificationService);
   }
 
-  @Resource
+  @Autowired
   private UserRepository userRepository;
 
   @Override

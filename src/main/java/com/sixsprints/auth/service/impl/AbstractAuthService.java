@@ -23,9 +23,9 @@ import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.AbstractCrudService;
 import com.sixsprints.core.transformer.GenericMapper;
-import com.sixsprints.core.utils.AppConstants;
 import com.sixsprints.core.utils.AuthUtil;
 import com.sixsprints.core.utils.EncryptionUtil;
+import com.sixsprints.core.utils.EnvConstants;
 import com.sixsprints.notification.dto.MessageDto;
 import com.sixsprints.notification.service.NotificationService;
 
@@ -180,7 +180,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   protected int tokenExpiryInDays() {
-    return AppConstants.TOKEN_EXPIRY_IN_DAYS;
+    return EnvConstants.TOKEN_EXPIRY_IN_DAYS;
   }
 
   protected EntityInvalidException invalidOtpError(String authId, String otp) {

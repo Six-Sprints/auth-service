@@ -3,6 +3,8 @@ package com.sixsprints.auth.util;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sixsprints.auth.domain.Role;
 import com.sixsprints.auth.dto.PermissionDto;
 import com.sixsprints.core.enums.AccessPermission;
@@ -12,7 +14,8 @@ public class PermissionUtil {
   public static final String ANY = "ANY";
 
   public static Boolean allAny(String entityPermission, AccessPermission accessPermission) {
-    return AccessPermission.ANY.equals(accessPermission) && ANY.equals(entityPermission);
+    return AccessPermission.ANY.equals(accessPermission)
+      && (ANY.equals(entityPermission) || StringUtils.isBlank(entityPermission));
   }
 
   public static Boolean hasAccess(Role role, String entityPermission, AccessPermission accessPermission) {
