@@ -1,5 +1,6 @@
 package com.sixsprints.auth.domain;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -22,6 +23,7 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public abstract class AbstractAuthenticableEntity extends AbstractMongoEntity implements Authenticable {
 
+  @Serial
   private static final long serialVersionUID = 4277363213912119827L;
 
   private String password;
