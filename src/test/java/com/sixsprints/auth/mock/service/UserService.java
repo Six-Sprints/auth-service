@@ -51,7 +51,7 @@ public class UserService extends AbstractOtpBasedAuthService<User, UserDto>
   }
 
   @Override
-  protected EntityAlreadyExistsException alreadyExistsException(User domain) {
+  protected EntityAlreadyExistsException alreadyExistsException(User fromDb, User domain) {
     return EntityAlreadyExistsException.childBuilder().error(Messages.USER_ALREADY_EXISTS)
       .arg(domain.getEmail()).arg(domain.getMobileNumber()).build();
   }
