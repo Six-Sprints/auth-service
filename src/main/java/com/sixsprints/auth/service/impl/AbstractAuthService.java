@@ -78,6 +78,10 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   @Override
   public Otp sendOtp(String authId) throws EntityNotFoundException {
+    T user = findByAuthId(authId);
+    if (user == null) {
+      return null;
+    }
     Otp otp = otpService.generate(authId, otpLength());
     sendMessageToUser(otp);
     return otp;
