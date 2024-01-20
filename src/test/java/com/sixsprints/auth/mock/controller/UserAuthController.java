@@ -10,7 +10,7 @@ import com.sixsprints.auth.mock.service.UserService;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth")
-public class UserAuthController extends AbstractOtpBasedAuthController<User, UserDto> {
+public class UserAuthController extends AbstractOtpBasedAuthController<User, UserDto, UserDto> {
 
   public UserAuthController(UserService service) {
     super(service);

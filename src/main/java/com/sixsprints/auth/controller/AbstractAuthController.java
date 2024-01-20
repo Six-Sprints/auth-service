@@ -22,22 +22,22 @@ import com.sixsprints.core.utils.ApplicationContext;
 import com.sixsprints.core.utils.RestResponse;
 import com.sixsprints.core.utils.RestUtil;
 
-public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, DTO, L extends Authenticable, R extends ResetPasscode> {
+public abstract class AbstractAuthController<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO, L extends Authenticable, R extends ResetPasscode> {
 
-  private final AuthService<T, DTO> authService;
+  private final AuthService<T, DTO, DETAIL_DTO> authService;
 
-  public AbstractAuthController(AuthService<T, DTO> service) {
+  public AbstractAuthController(AuthService<T, DTO, DETAIL_DTO> service) {
     this.authService = service;
   }
 
   @PostMapping("/register")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> register(@RequestBody @Valid DTO dto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DETAIL_DTO>>> register(@RequestBody @Valid DTO dto)
     throws EntityAlreadyExistsException, EntityInvalidException {
     return RestUtil.successResponse(authService.register(dto), HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid L authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DETAIL_DTO>>> login(@RequestBody @Valid L authDto)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     return RestUtil.successResponse(authService.login(authDto));
   }
@@ -58,7 +58,7 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
 
   @Authenticated
   @PostMapping("/validate-token")
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> validateToken() {
+  public ResponseEntity<RestResponse<AuthResponseDto<DETAIL_DTO>>> validateToken() {
     T user = ApplicationContext.getCurrentUser();
     return RestUtil.successResponse(authService.validateToken(user));
   }

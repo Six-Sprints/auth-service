@@ -11,18 +11,19 @@ import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.transformer.GenericMapper;
 import com.sixsprints.notification.service.NotificationService;
 
-public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticableEntity, DTO>
-  extends AbstractAuthService<T, DTO> implements OtpBasedAuthService<T, DTO> {
+public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO>
+  extends AbstractAuthService<T, DTO, DETAIL_DTO> implements OtpBasedAuthService<T, DTO, DETAIL_DTO> {
 
   private final GenericMapper<T, DTO> mapper;
 
-  public AbstractOtpBasedAuthService(GenericMapper<T, DTO> mapper, NotificationService notificationService) {
-    super(mapper, notificationService);
+  public AbstractOtpBasedAuthService(GenericMapper<T, DTO> mapper, GenericMapper<T, DETAIL_DTO> detailMapper,
+    NotificationService notificationService) {
+    super(mapper, detailMapper, notificationService);
     this.mapper = mapper;
   }
 
   @Override
-  public AuthResponseDto<DTO> login(Authenticable authenticable)
+  public AuthResponseDto<DETAIL_DTO> login(Authenticable authenticable)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     T user = findByAuthId(authenticable.authId());
     if (user == null) {

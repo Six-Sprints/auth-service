@@ -10,14 +10,14 @@ import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.GenericCrudService;
 
-public interface AuthService<T extends AbstractAuthenticableEntity, DTO> extends GenericCrudService<T> {
+public interface AuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO> extends GenericCrudService<T> {
 
-  AuthResponseDto<DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException;
+  AuthResponseDto<DETAIL_DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException;
 
-  AuthResponseDto<DTO> login(Authenticable authenticable)
+  AuthResponseDto<DETAIL_DTO> login(Authenticable authenticable)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException;
 
-  AuthResponseDto<DTO> validateToken(T user);
+  AuthResponseDto<DETAIL_DTO> validateToken(T user);
 
   Otp sendOtp(String authId) throws EntityNotFoundException;
 

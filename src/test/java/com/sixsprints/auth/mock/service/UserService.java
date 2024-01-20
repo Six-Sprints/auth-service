@@ -20,11 +20,11 @@ import com.sixsprints.core.repository.GenericRepository;
 import com.sixsprints.notification.service.NotificationService;
 
 @Service
-public class UserService extends AbstractOtpBasedAuthService<User, UserDto>
-  implements OtpBasedAuthService<User, UserDto> {
+public class UserService extends AbstractOtpBasedAuthService<User, UserDto, UserDto>
+  implements OtpBasedAuthService<User, UserDto, UserDto> {
 
   public UserService(UserMapper mapper, NotificationService notificationService) {
-    super(mapper, notificationService);
+    super(mapper, mapper, notificationService);
   }
 
   @Autowired

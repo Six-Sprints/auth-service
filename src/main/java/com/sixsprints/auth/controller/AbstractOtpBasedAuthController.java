@@ -21,18 +21,18 @@ import com.sixsprints.core.utils.RestUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthenticableEntity, DTO>
-  extends AbstractAuthController<T, DTO, OtpLoginDto, ResetPasscode> {
+public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO>
+  extends AbstractAuthController<T, DTO, DETAIL_DTO, OtpLoginDto, ResetPasscode> {
 
-  private final OtpBasedAuthService<T, DTO> service;
+  private final OtpBasedAuthService<T, DTO, DETAIL_DTO> service;
 
-  public AbstractOtpBasedAuthController(OtpBasedAuthService<T, DTO> service) {
+  public AbstractOtpBasedAuthController(OtpBasedAuthService<T, DTO, DETAIL_DTO> service) {
     super(service);
     this.service = service;
   }
 
   @PostMapping("/send-otp-login")
-  public ResponseEntity<RestResponse<DTO>> sendOtpFrAuth(@RequestBody @Valid OtpLoginDto auth)
+  public ResponseEntity<RestResponse<DTO>> sendOtpForAuth(@RequestBody @Valid OtpLoginDto auth)
     throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to send otp for {}", auth.authId());
     DTO user = service.sendOtpForAuth(auth.authId());
@@ -40,7 +40,7 @@ public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthentic
   }
 
   @Override
-  public ResponseEntity<RestResponse<AuthResponseDto<DTO>>> login(@RequestBody @Valid OtpLoginDto authDto)
+  public ResponseEntity<RestResponse<AuthResponseDto<DETAIL_DTO>>> login(@RequestBody @Valid OtpLoginDto authDto)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     return super.login(authDto);
   }

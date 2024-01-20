@@ -32,10 +32,13 @@ import com.sixsprints.notification.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO> extends AbstractCrudService<T>
-  implements AuthService<T, DTO> {
+public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO>
+  extends AbstractCrudService<T>
+  implements AuthService<T, DTO, DETAIL_DTO> {
 
-  private final GenericMapper<T, DTO> mapper;
+  private final GenericMapper<T, DTO> dtoMapper;
+
+  private final GenericMapper<T, DETAIL_DTO> detailMapper;
 
   private final NotificationService notificationService;
 
@@ -45,8 +48,10 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   @Autowired
   private RoleService roleService;
 
-  public AbstractAuthService(GenericMapper<T, DTO> mapper, NotificationService notificationService) {
-    this.mapper = mapper;
+  public AbstractAuthService(GenericMapper<T, DTO> dtoMapper, GenericMapper<T, DETAIL_DTO> mapper,
+    NotificationService notificationService) {
+    this.dtoMapper = dtoMapper;
+    this.detailMapper = mapper;
     this.notificationService = notificationService;
   }
 
@@ -59,12 +64,12 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
-  public AuthResponseDto<DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException {
-    return generateToken(create(mapper.toDomain(dto)));
+  public AuthResponseDto<DETAIL_DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException {
+    return generateToken(create(dtoMapper.toDomain(dto)));
   }
 
   @Override
-  public AuthResponseDto<DTO> login(Authenticable authenticable)
+  public AuthResponseDto<DETAIL_DTO> login(Authenticable authenticable)
     throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     T user = findByAuthId(authenticable.authId());
     if (user == null) {
@@ -116,7 +121,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
-  public AuthResponseDto<DTO> validateToken(T user) {
+  public AuthResponseDto<DETAIL_DTO> validateToken(T user) {
     return generateToken(user);
   }
 
@@ -157,14 +162,14 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
       .arg(authenticable.authId()).data(authenticable.authId()).build();
   }
 
-  protected AuthResponseDto<DTO> generateToken(T domain) {
+  protected AuthResponseDto<DETAIL_DTO> generateToken(T domain) {
 
     String roleSlug = domain.getRoleSlug();
     Role role = fetchRole(roleSlug);
 
-    return AuthResponseDto.<DTO>builder()
+    return AuthResponseDto.<DETAIL_DTO>builder()
       .token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
-      .data(mapper.toDto(domain))
+      .data(detailMapper.toDto(domain))
       .roleName(role.getName())
       .permissions(role.getPermissions())
       .build();
