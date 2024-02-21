@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
+import com.sixsprints.auth.domain.AbstractRole;
 import com.sixsprints.auth.domain.Otp;
-import com.sixsprints.auth.domain.Role;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
+import com.sixsprints.auth.service.AbstractRoleService;
 import com.sixsprints.auth.service.AuthService;
 import com.sixsprints.auth.service.OtpService;
-import com.sixsprints.auth.service.RoleService;
 import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
@@ -32,7 +32,7 @@ import com.sixsprints.notification.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO>
+public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO, ROLE extends AbstractRole>
   extends AbstractCrudService<T>
   implements AuthService<T, DTO, DETAIL_DTO> {
 
@@ -46,7 +46,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   private OtpService otpService;
 
   @Autowired
-  private RoleService roleService;
+  private AbstractRoleService<ROLE> roleService;
 
   public AbstractAuthService(GenericMapper<T, DTO> dtoMapper, GenericMapper<T, DETAIL_DTO> mapper,
     NotificationService notificationService) {
@@ -165,27 +165,26 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   protected AuthResponseDto<DETAIL_DTO> generateToken(T domain) {
 
     String roleSlug = domain.getRoleSlug();
-    Role role = fetchRole(roleSlug);
+    ROLE role = fetchRole(roleSlug);
 
     return AuthResponseDto.<DETAIL_DTO>builder()
       .token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
       .data(detailMapper.toDto(domain))
-      .roleName(role.getName())
-      .permissions(role.getPermissions())
+      .roleName(role == null ? null : role.getName())
+      .modulePermissions(role == null ? null : role.getModulePermissions())
       .build();
   }
 
-  private Role fetchRole(String roleSlug) {
-    Role role = Role.builder().build();
+  private ROLE fetchRole(String roleSlug) {
     try {
       if (StringUtils.isNotBlank(roleSlug)) {
-        role = roleService.findBySlug(roleSlug);
+        return roleService.findBySlug(roleSlug);
       }
     } catch (EntityNotFoundException ex) {
       log.error("Role not found with slug = {}", roleSlug);
       log.error(ex.getMessage(), ex);
     }
-    return role == null ? Role.builder().build() : role;
+    return null;
   }
 
   protected int tokenExpiryInDays() {

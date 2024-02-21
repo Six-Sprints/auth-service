@@ -1,57 +1,57 @@
 package com.sixsprints.auth.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
 
-import com.sixsprints.auth.domain.Role;
-import com.sixsprints.auth.dto.AccessDto;
-import com.sixsprints.auth.dto.PermissionDto;
-import com.sixsprints.core.enums.AccessPermission;
+import com.sixsprints.auth.domain.AbstractRole;
+import com.sixsprints.auth.domain.embedded.ModulePermission;
+import com.sixsprints.auth.mock.domain.Role;
+import com.sixsprints.core.auth.BasicPermissionEnum;
+import com.sixsprints.core.auth.ModuleDefinition;
 
 public class PermissionUtilTest {
 
-  private static final String USER = "USER";
-  private static final String COMPANY = "COMPANY";
+  private static enum MockModule implements ModuleDefinition {
+    ANY, USER, COMPANY;
+  }
 
   @Test
   public void shouldHaveAccess() {
-    Role role = mockRoleWithUserCreateAndReadAll();
-    Assert.isTrue(PermissionUtil.hasAccess(role, USER, AccessPermission.CREATE), "Must be true");
-    Assert.isTrue(PermissionUtil.hasAccess(role, USER, AccessPermission.READ), "Must be true");
-    Assert.isTrue(PermissionUtil.hasAccess(role, PermissionUtil.ANY, AccessPermission.READ),
+    AbstractRole role = mockRoleWithUserCreateAndReadAll();
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.CREATE), "Must be true");
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.READ), "Must be true");
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.ANY, BasicPermissionEnum.READ),
       "Must be true for Any Entity");
-    Assert.isTrue(PermissionUtil.hasAccess(role, USER, AccessPermission.ANY),
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.ANY),
       "Must be true for Any Access");
 
-    Assert.isTrue(PermissionUtil.hasAccess(role, COMPANY, AccessPermission.DELETE),
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.COMPANY, BasicPermissionEnum.DELETE),
       "Must be true for Any Access");
   }
 
   @Test
   public void shouldNotHaveAccess() {
-    Role role = mockRoleWithUserCreateAndReadAll();
-    Assert.isTrue(!PermissionUtil.hasAccess(role, USER, AccessPermission.DELETE),
+    AbstractRole role = mockRoleWithUserCreateAndReadAll();
+    Assert.isTrue(!PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.DELETE),
       "Must not be true for User Delete All");
-    Assert.isTrue(!PermissionUtil.hasAccess(role, USER, AccessPermission.UPDATE),
+    Assert.isTrue(!PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.UPDATE),
       "Must not be true for User Update All");
   }
 
-  private Role mockRoleWithUserCreateAndReadAll() {
-    List<PermissionDto> permissions = new ArrayList<>();
+  private AbstractRole mockRoleWithUserCreateAndReadAll() {
 
-    permissions.add(
-      PermissionDto.builder().entityPermission(USER)
-        .access(AccessDto.builder().accessPermission(AccessPermission.CREATE).build())
-        .access(AccessDto.builder().accessPermission(AccessPermission.READ).build()).build());
+    return Role.builder().name("R1")
+      .modulePermission(ModulePermission.builder()
+        .module(MockModule.USER)
+        .permission(BasicPermissionEnum.CREATE)
+        .permission(BasicPermissionEnum.READ)
+        .build())
 
-    permissions.add(
-      PermissionDto.builder().entityPermission(COMPANY).access(
-        AccessDto.builder().accessPermission(AccessPermission.ANY).build()).build());
-
-    return Role.builder().name("R1").permissions(permissions).build();
+      .modulePermission(ModulePermission.builder()
+        .module(MockModule.COMPANY)
+        .permission(BasicPermissionEnum.ANY)
+        .build())
+      .build();
   }
 
 }

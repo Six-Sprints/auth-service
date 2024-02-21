@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sixsprints.auth.mock.domain.Role;
 import com.sixsprints.auth.mock.domain.User;
 import com.sixsprints.auth.mock.dto.UserDto;
 import com.sixsprints.auth.mock.repository.UserRepository;
@@ -20,7 +21,7 @@ import com.sixsprints.core.repository.GenericRepository;
 import com.sixsprints.notification.service.NotificationService;
 
 @Service
-public class UserService extends AbstractOtpBasedAuthService<User, UserDto, UserDto>
+public class UserService extends AbstractOtpBasedAuthService<User, UserDto, UserDto, Role>
   implements OtpBasedAuthService<User, UserDto, UserDto> {
 
   public UserService(UserMapper mapper, NotificationService notificationService) {

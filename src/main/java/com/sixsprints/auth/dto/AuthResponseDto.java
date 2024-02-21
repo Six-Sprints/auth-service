@@ -2,6 +2,8 @@ package com.sixsprints.auth.dto;
 
 import java.util.List;
 
+import com.sixsprints.auth.domain.embedded.ModulePermission;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +21,6 @@ public class AuthResponseDto<T> {
 
   private String roleName;
 
-  private List<PermissionDto> permissions;
+  private List<ModulePermission> modulePermissions;
 
 }

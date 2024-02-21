@@ -2,26 +2,23 @@ package com.sixsprints.auth.interceptor;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
-import com.sixsprints.auth.domain.Role;
-import com.sixsprints.auth.service.RoleService;
+import com.sixsprints.auth.domain.AbstractRole;
+import com.sixsprints.auth.service.AbstractRoleService;
 import com.sixsprints.auth.util.PermissionUtil;
-import com.sixsprints.core.annotation.Authenticated;
-import com.sixsprints.core.enums.AccessPermission;
+import com.sixsprints.core.auth.ModuleDefinition;
+import com.sixsprints.core.auth.PermissionDefinition;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.interceptor.AbstractAuthenticationInterceptor;
 import com.sixsprints.core.service.GenericCrudService;
-import com.sixsprints.core.utils.ApplicationContext;
-import com.sixsprints.core.utils.HttpRequestUtil;
 
-public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthenticableEntity>
+public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthenticableEntity, ROLE extends AbstractRole>
   extends AbstractAuthenticationInterceptor<T> {
 
   private static final String USER = "user";
@@ -30,33 +27,31 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
   private String apiVersionPrefix;
 
   @Autowired
-  private RoleService roleService;
+  private AbstractRoleService<ROLE> roleService;
 
   public AbstractRoleBasedAuthInterceptor(GenericCrudService<T> userService) {
     super(userService);
   }
 
   @Override
-  protected void checkUserPermissions(T user, Authenticated authAnnotation)
+  protected void checkUserPermissions(T user, ModuleDefinition module, PermissionDefinition permission,
+    boolean required)
     throws NotAuthenticatedException, EntityNotFoundException {
-    String entityPermission = computeEntityPermission(authAnnotation);
-    AccessPermission accessPermission = computeAccess(authAnnotation);
-    if (PermissionUtil.allAny(entityPermission, accessPermission)) {
+    if (PermissionUtil.allAny(module, permission)) {
       return;
     }
-    Role role = roleService.findBySlug(user.getRoleSlug());
-    Boolean hasAccess = PermissionUtil.hasAccess(role, entityPermission, accessPermission);
+    ROLE role = roleService.findBySlug(user.getRoleSlug());
+    Boolean hasAccess = PermissionUtil.hasAccess(role, module, permission);
     if (!hasAccess) {
-      throwException(authAnnotation, unauthorisedErrorMessage(user));
+      throwException(required, unauthorisedErrorMessage(user));
     }
   }
 
   @Override
-  protected void checkIfTokenInvalid(T user, String token, Authenticated authAnnotation)
-    throws NotAuthenticatedException {
+  protected void checkIfTokenInvalid(T user, String token, boolean required) throws NotAuthenticatedException {
     List<String> invalidTokens = user.getInvalidTokens();
     if (!CollectionUtils.isEmpty(invalidTokens) && invalidTokens.contains(token)) {
-      throwException(authAnnotation, tokenInvalidErrorMessage());
+      throwException(required, tokenInvalidErrorMessage());
     }
   }
 
@@ -66,17 +61,6 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
     if (user != null) {
       MDC.put(USER, user.authId());
     }
-  }
-
-  protected AccessPermission computeAccess(Authenticated authAnnotation) {
-    return authAnnotation.access();
-  }
-
-  protected String computeEntityPermission(Authenticated authAnnotation) {
-
-    String moduleEntity = HttpRequestUtil.extractModuleName(apiVersionPrefix,
-      ApplicationContext.getCurrentRequest().getUri());
-    return StringUtils.isEmpty(authAnnotation.entity()) ? moduleEntity : authAnnotation.entity();
   }
 
 }

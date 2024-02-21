@@ -50,7 +50,7 @@ public class UserAuthControllerTest extends BaseControllerTest {
     Mockito.when(notificationService.sendMessage(Mockito.any())).thenReturn(future);
 
     Mockito.when(otpService.generate(Mockito.anyString(), Mockito.anyInt())).thenAnswer(inv -> {
-      String num = inv.getArgument(0); 
+      String num = inv.getArgument(0);
       return Otp.builder().authId(num).otp("1234").build();
     });
 
@@ -237,6 +237,26 @@ public class UserAuthControllerTest extends BaseControllerTest {
       .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
       .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.FALSE)))
       .andExpect(MockMvcResultMatchers.jsonPath("$.message", CoreMatchers.notNullValue()));
+  }
+
+  @Test
+  public void shouldNotValidateTokenAfterLogout() throws Exception {
+    String mobileNumber = "9810306710";
+    AuthResponseDto<UserDto> user = saveUser(mobileNumber);
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/logout").header(AuthInterceptor.TOKEN, user.getToken()))
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.TRUE)));
+
+    mvc.perform(
+      MockMvcRequestBuilders.post("/api/v1/auth/validate-token")
+        .header(AuthInterceptor.TOKEN, user.getToken()).contentType(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.status().isForbidden())
+      .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(Boolean.FALSE)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.message", CoreMatchers.notNullValue()));
+
   }
 
   private AuthResponseDto<UserDto> saveUser(String mobileNumber)

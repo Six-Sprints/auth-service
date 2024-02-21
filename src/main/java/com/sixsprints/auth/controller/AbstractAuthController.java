@@ -13,7 +13,7 @@ import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.auth.dto.ResetPasscode;
 import com.sixsprints.auth.service.AuthService;
-import com.sixsprints.core.annotation.Authenticated;
+import com.sixsprints.core.auth.BasicAuth;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
@@ -56,14 +56,14 @@ public abstract class AbstractAuthController<T extends AbstractAuthenticableEnti
     return RestUtil.successResponse("Password has been reset successfully", HttpStatus.OK);
   }
 
-  @Authenticated
+  @BasicAuth
   @PostMapping("/validate-token")
   public ResponseEntity<RestResponse<AuthResponseDto<DETAIL_DTO>>> validateToken() {
     T user = ApplicationContext.getCurrentUser();
     return RestUtil.successResponse(authService.validateToken(user));
   }
 
-  @Authenticated(required = false)
+  @BasicAuth(required = false)
   @PostMapping("/logout")
   public ResponseEntity<?> logout(String token) {
     T user = ApplicationContext.getCurrentUser();

@@ -2,10 +2,9 @@ package com.sixsprints.auth.domain;
 
 import java.util.List;
 
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.sixsprints.auth.dto.PermissionDto;
+import com.sixsprints.auth.domain.embedded.ModulePermission;
 import com.sixsprints.core.domain.AbstractMongoEntity;
 
 import lombok.AllArgsConstructor;
@@ -21,14 +20,15 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Document
-public class Role extends AbstractMongoEntity {
+public abstract class AbstractRole extends AbstractMongoEntity {
 
   private static final long serialVersionUID = 6464769316000227488L;
 
-  @Indexed(unique = true)
   private String name;
 
+  private String description;
+
   @Singular
-  private List<PermissionDto> permissions;
+  private List<ModulePermission> modulePermissions;
 
 }

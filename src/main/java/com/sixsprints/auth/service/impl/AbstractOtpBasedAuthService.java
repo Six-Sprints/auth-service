@@ -1,6 +1,7 @@
 package com.sixsprints.auth.service.impl;
 
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
+import com.sixsprints.auth.domain.AbstractRole;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.auth.service.OtpBasedAuthService;
@@ -11,8 +12,8 @@ import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.transformer.GenericMapper;
 import com.sixsprints.notification.service.NotificationService;
 
-public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO>
-  extends AbstractAuthService<T, DTO, DETAIL_DTO> implements OtpBasedAuthService<T, DTO, DETAIL_DTO> {
+public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO, ROLE extends AbstractRole>
+  extends AbstractAuthService<T, DTO, DETAIL_DTO, ROLE> implements OtpBasedAuthService<T, DTO, DETAIL_DTO> {
 
   private final GenericMapper<T, DTO> mapper;
 
