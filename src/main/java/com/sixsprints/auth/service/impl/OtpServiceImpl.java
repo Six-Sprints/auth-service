@@ -1,6 +1,5 @@
 package com.sixsprints.auth.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sixsprints.auth.domain.Otp;
@@ -11,11 +10,13 @@ import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.service.AbstractCrudService;
 import com.sixsprints.core.utils.RandomUtil;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class OtpServiceImpl extends AbstractCrudService<Otp> implements OtpService {
 
-  @Autowired
-  private OtpRepository otpRepository;
+  private final OtpRepository otpRepository;
 
   @Override
   public Otp generate(String authId, int length) {

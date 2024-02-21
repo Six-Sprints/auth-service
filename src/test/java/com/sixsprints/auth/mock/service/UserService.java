@@ -3,7 +3,6 @@ package com.sixsprints.auth.mock.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sixsprints.auth.mock.domain.Role;
@@ -12,6 +11,7 @@ import com.sixsprints.auth.mock.dto.UserDto;
 import com.sixsprints.auth.mock.repository.UserRepository;
 import com.sixsprints.auth.mock.transformer.UserMapper;
 import com.sixsprints.auth.service.OtpBasedAuthService;
+import com.sixsprints.auth.service.OtpService;
 import com.sixsprints.auth.service.impl.AbstractOtpBasedAuthService;
 import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.dto.MetaData;
@@ -24,12 +24,13 @@ import com.sixsprints.notification.service.NotificationService;
 public class UserService extends AbstractOtpBasedAuthService<User, UserDto, UserDto, Role>
   implements OtpBasedAuthService<User, UserDto, UserDto> {
 
-  public UserService(UserMapper mapper, NotificationService notificationService) {
-    super(mapper, mapper, notificationService);
+  public UserService(UserMapper mapper, NotificationService notificationService, UserRepository userRepository,
+    OtpService otpService, RoleServiceImpl roleService) {
+    super(mapper, mapper, notificationService, otpService, roleService);
+    this.userRepository = userRepository;
   }
 
-  @Autowired
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
 
   @Override
   protected GenericRepository<User> repository() {

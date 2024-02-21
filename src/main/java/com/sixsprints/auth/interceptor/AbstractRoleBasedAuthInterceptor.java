@@ -3,7 +3,6 @@ package com.sixsprints.auth.interceptor;
 import java.util.List;
 
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 
@@ -26,11 +25,11 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
   @Value("${api.version.prefix:/api/v1/}")
   private String apiVersionPrefix;
 
-  @Autowired
-  private AbstractRoleService<ROLE> roleService;
+  private final AbstractRoleService<ROLE> roleService;
 
-  public AbstractRoleBasedAuthInterceptor(GenericCrudService<T> userService) {
+  public AbstractRoleBasedAuthInterceptor(GenericCrudService<T> userService, AbstractRoleService<ROLE> roleService) {
     super(userService);
+    this.roleService = roleService;
   }
 
   @Override

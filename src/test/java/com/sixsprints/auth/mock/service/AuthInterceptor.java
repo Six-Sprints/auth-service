@@ -9,8 +9,8 @@ import com.sixsprints.auth.mock.domain.User;
 @Component
 public class AuthInterceptor extends AbstractRoleBasedAuthInterceptor<User, Role> {
 
-  public AuthInterceptor(UserService userService) {
-    super(userService);
+  public AuthInterceptor(UserService userService, RoleServiceImpl roleService) {
+    super(userService, roleService);
   }
 
   public static final String TOKEN = "X-AUTH-TOKEN";

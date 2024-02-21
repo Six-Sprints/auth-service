@@ -5,6 +5,4 @@ import com.sixsprints.core.repository.GenericRepository;
 
 public interface AbstractRoleRepository<T extends AbstractRole> extends GenericRepository<T> {
 
-  T findByNameIgnoreCase(String name);
-
 }

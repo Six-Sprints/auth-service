@@ -18,11 +18,6 @@ public class RoleServiceImpl extends AbstractCrudService<Role> implements Abstra
   private final RoleRepository repository;
 
   @Override
-  public Role findByName(String name) {
-    return repository.findByNameIgnoreCase(name);
-  }
-
-  @Override
   protected Role findDuplicate(Role entity) {
     return repository.findByNameIgnoreCase(entity.getName());
   }

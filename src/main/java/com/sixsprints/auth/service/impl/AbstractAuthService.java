@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -29,9 +28,11 @@ import com.sixsprints.core.utils.EnvConstants;
 import com.sixsprints.notification.dto.MessageDto;
 import com.sixsprints.notification.service.NotificationService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
 public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO, ROLE extends AbstractRole>
   extends AbstractCrudService<T>
   implements AuthService<T, DTO, DETAIL_DTO> {
@@ -42,18 +43,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   private final NotificationService notificationService;
 
-  @Autowired
-  private OtpService otpService;
+  private final OtpService otpService;
 
-  @Autowired
-  private AbstractRoleService<ROLE> roleService;
-
-  public AbstractAuthService(GenericMapper<T, DTO> dtoMapper, GenericMapper<T, DETAIL_DTO> mapper,
-    NotificationService notificationService) {
-    this.dtoMapper = dtoMapper;
-    this.detailMapper = mapper;
-    this.notificationService = notificationService;
-  }
+  private final AbstractRoleService<ROLE> roleService;
 
   @Override
   protected void preCreate(T user) {

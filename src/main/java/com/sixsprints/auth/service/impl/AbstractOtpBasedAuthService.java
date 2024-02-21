@@ -4,7 +4,9 @@ import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
 import com.sixsprints.auth.domain.AbstractRole;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
+import com.sixsprints.auth.service.AbstractRoleService;
 import com.sixsprints.auth.service.OtpBasedAuthService;
+import com.sixsprints.auth.service.OtpService;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
@@ -18,8 +20,8 @@ public abstract class AbstractOtpBasedAuthService<T extends AbstractAuthenticabl
   private final GenericMapper<T, DTO> mapper;
 
   public AbstractOtpBasedAuthService(GenericMapper<T, DTO> mapper, GenericMapper<T, DETAIL_DTO> detailMapper,
-    NotificationService notificationService) {
-    super(mapper, detailMapper, notificationService);
+    NotificationService notificationService, OtpService otpService, AbstractRoleService<ROLE> roleService) {
+    super(mapper, detailMapper, notificationService, otpService, roleService);
     this.mapper = mapper;
   }
 
