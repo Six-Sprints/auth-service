@@ -50,7 +50,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   @Override
   protected void preCreate(T user) {
     if (StringUtils.isBlank(user.getPassword())) {
-      user.setPassword(EncryptionUtil.encrypt(user.authId()));
+      user.setPassword(EncryptionUtil.encrypt(defaultPassword(user)));
     } else
       user.setPassword(EncryptionUtil.encrypt(user.getPassword()));
   }
@@ -102,14 +102,8 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
     if (user == null) {
       throw notFoundException(authId);
     }
-    user.setPassword(EncryptionUtil.encrypt(newPassword));
     otpService.delete(otpFromDb);
-    preResetPassword(otpFromDb, user);
-    save(user);
-  }
-
-  protected void preResetPassword(Otp otpFromDb, T user) {
-
+    patchUpdateRaw(user.getId(), EncryptionUtil.encrypt(newPassword), AbstractAuthenticableEntity.PASSWORD);
   }
 
   @Override
@@ -130,18 +124,25 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
       invalidTokens.remove(0);
     }
     invalidTokens.add(token);
-    save(user);
+    patchUpdateRaw(user.getId(), invalidTokens, AbstractAuthenticableEntity.INVALID_TOKENS);
   }
 
   protected abstract T findByAuthId(String authId);
+
+  protected String defaultPassword(T user) {
+    return user.authId();
+  }
 
   protected void sendMessageToUser(Otp otp) {
     notificationService.sendMessage(otpMessage(otp));
   }
 
   protected MessageDto otpMessage(Otp otp) {
-    return MessageDto.builder().to(otp.getAuthId()).subject("OTP Generated Successfully")
-      .content(String.format("Your OTP: %s", otp.getOtp())).build();
+    return MessageDto.builder()
+      .to(otp.getAuthId())
+      .subject("OTP Generated Successfully")
+      .content(String.format("Your OTP: %s", otp.getOtp()))
+      .build();
   }
 
   protected int otpLength() {

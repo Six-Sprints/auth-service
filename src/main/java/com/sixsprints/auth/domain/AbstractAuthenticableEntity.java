@@ -23,6 +23,11 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public abstract class AbstractAuthenticableEntity extends AbstractMongoEntity implements Authenticable {
 
+  
+  public final static String PASSWORD = "password";
+  
+  public final static String INVALID_TOKENS = "invalidTokens";
+  
   @Serial
   private static final long serialVersionUID = 4277363213912119827L;
 
