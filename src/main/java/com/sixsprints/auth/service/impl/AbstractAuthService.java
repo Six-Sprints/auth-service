@@ -57,7 +57,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   @Override
   public AuthResponseDto<DETAIL_DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException {
-    return generateToken(create(dtoMapper.toDomain(dto)));
+    T domain = dtoMapper.toDomain(dto);
+    preRegister(domain);
+    return generateToken(create(domain));
   }
 
   @Override
@@ -128,6 +130,10 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   protected abstract T findByAuthId(String authId);
+
+  protected void preRegister(T domain) {
+
+  }
 
   protected String defaultPassword(T user) {
     return user.authId();
