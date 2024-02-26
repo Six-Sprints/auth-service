@@ -37,6 +37,8 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   extends AbstractCrudService<T>
   implements AuthService<T, DTO, DETAIL_DTO> {
 
+  private static final String NO_ROLE = "None";
+
   private final GenericMapper<T, DTO> dtoMapper;
 
   private final GenericMapper<T, DETAIL_DTO> detailMapper;
@@ -59,7 +61,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   public AuthResponseDto<DETAIL_DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException {
     T domain = dtoMapper.toDomain(dto);
     preRegister(domain);
-    return generateToken(create(domain));
+    domain = create(domain);
+    postRegister(domain);
+    return generateToken(domain);
   }
 
   @Override
@@ -135,6 +139,10 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   }
 
+  protected void postRegister(T domain) {
+
+  }
+
   protected String defaultPassword(T user) {
     return user.authId();
   }
@@ -169,8 +177,8 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
     return AuthResponseDto.<DETAIL_DTO>builder()
       .token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
       .data(detailMapper.toDto(domain))
-      .roleName(role == null ? null : role.getName())
-      .modulePermissions(role == null ? null : role.getModulePermissions())
+      .roleName(role == null ? NO_ROLE : role.getName())
+      .modulePermissions(role == null ? new ArrayList<>() : role.getModulePermissions())
       .build();
   }
 
