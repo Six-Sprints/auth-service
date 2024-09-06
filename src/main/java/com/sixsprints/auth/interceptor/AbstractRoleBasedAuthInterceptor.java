@@ -3,7 +3,6 @@ package com.sixsprints.auth.interceptor;
 import java.util.List;
 
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
@@ -21,9 +20,6 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
   extends AbstractAuthenticationInterceptor<T> {
 
   private static final String USER = "user";
-
-  @Value("${api.version.prefix:/api/v1/}")
-  private String apiVersionPrefix;
 
   private final AbstractRoleService<ROLE> roleService;
 
