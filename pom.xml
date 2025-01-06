@@ -6,20 +6,20 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.3</version>
+		<version>3.4.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.sixsprints</groupId>
 	<artifactId>auth-service</artifactId>
-	<version>3.3.314</version>
+	<version>3.4.100</version>
 	<name>auth-service</name>
 	<packaging>jar</packaging>
 	<description>Auth Service API</description>
 
 	<properties>
 		<java.version>17</java.version>
-		<ss.mongocore.version>3.3.314</ss.mongocore.version>
-		<ss.notification.version>0.1.18</ss.notification.version>
+		<ss.mongocore.version>3.4.100</ss.mongocore.version>
+		<ss.notification.version>0.1.23</ss.notification.version>
 	</properties>
 
 	<dependencies>
@@ -70,6 +70,10 @@
 				<configuration>
 					<classifier>exec</classifier>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
