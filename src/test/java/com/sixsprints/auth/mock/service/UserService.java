@@ -17,7 +17,6 @@ import com.sixsprints.auth.util.Messages;
 import com.sixsprints.core.dto.MetaData;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
-import com.sixsprints.core.repository.GenericRepository;
 import com.sixsprints.notification.service.NotificationService;
 
 @Service
@@ -33,7 +32,7 @@ public class UserService extends AbstractOtpBasedAuthService<User, UserDto, User
   private final UserRepository userRepository;
 
   @Override
-  protected GenericRepository<User> repository() {
+  protected UserRepository repository() {
     return userRepository;
   }
 

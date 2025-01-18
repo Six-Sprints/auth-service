@@ -6,7 +6,6 @@ import com.sixsprints.auth.mock.domain.Role;
 import com.sixsprints.auth.mock.repository.RoleRepository;
 import com.sixsprints.auth.service.AbstractRoleService;
 import com.sixsprints.core.dto.MetaData;
-import com.sixsprints.core.repository.GenericRepository;
 import com.sixsprints.core.service.AbstractCrudService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class RoleServiceImpl extends AbstractCrudService<Role> implements Abstra
   }
 
   @Override
-  protected GenericRepository<Role> repository() {
+  protected RoleRepository repository() {
     return repository;
   }
 

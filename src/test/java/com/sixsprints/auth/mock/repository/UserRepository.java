@@ -1,9 +1,9 @@
 package com.sixsprints.auth.mock.repository;
 
 import com.sixsprints.auth.mock.domain.User;
-import com.sixsprints.core.repository.GenericRepository;
+import com.sixsprints.core.repository.GenericCrudRepository;
 
-public interface UserRepository extends GenericRepository<User> {
+public interface UserRepository extends GenericCrudRepository<User> {
 
   User findByMobileNumber(String mobileNumber);
 
