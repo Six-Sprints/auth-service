@@ -7,6 +7,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.sixsprints.auth.domain.embedded.ModulePermission;
 import com.sixsprints.core.domain.AbstractMongoEntity;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,11 +27,15 @@ public abstract class AbstractRole extends AbstractMongoEntity {
 
   private static final long serialVersionUID = 6464769316000227488L;
 
+  @NotNull
+  @Size(min = 1, max = 256)
   private String name;
 
+  @Size(max = 1024)
   private String description;
 
   @Singular
-  private List<ModulePermission> modulePermissions;
+  @Size(max = 512)
+  private List<@Valid ModulePermission> modulePermissions;
 
 }
