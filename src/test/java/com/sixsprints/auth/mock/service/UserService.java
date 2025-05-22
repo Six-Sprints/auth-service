@@ -37,6 +37,12 @@ public class UserService extends AbstractOtpBasedAuthService<User, UserDto, User
   }
 
   @Override
+  protected void preCreate(User user) {
+    super.preCreate(user);
+    user.setRoleSlug("RL001");
+  }
+  
+  @Override
   protected User findDuplicate(User entity) {
     return userRepository.findByEmailOrMobileNumber(entity.getEmail(), entity.getMobileNumber());
   }
