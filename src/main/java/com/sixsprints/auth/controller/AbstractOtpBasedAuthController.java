@@ -1,6 +1,6 @@
 package com.sixsprints.auth.controller;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO>
-  extends AbstractAuthController<T, DTO, DETAIL_DTO, OtpLoginDto, ResetPasscode> {
+    extends AbstractAuthController<T, DTO, DETAIL_DTO, OtpLoginDto, ResetPasscode> {
 
   private final OtpBasedAuthService<T, DTO, DETAIL_DTO> service;
 
@@ -33,15 +33,16 @@ public abstract class AbstractOtpBasedAuthController<T extends AbstractAuthentic
 
   @PostMapping("/send-otp-login")
   public ResponseEntity<RestResponse<DTO>> sendOtpForAuth(@RequestBody @Valid OtpLoginDto auth)
-    throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidException {
+      throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidException {
     log.info("Request to send otp for {}", auth.authId());
-    DTO user = service.sendOtpForAuth(auth.authId());
+    DTO user = service.sendOtpForAuthAndRegisterIfNotExists(auth.authId());
     return RestUtil.successResponse(user);
   }
 
   @Override
-  public ResponseEntity<RestResponse<AuthResponseDto<DETAIL_DTO>>> login(@RequestBody @Valid OtpLoginDto authDto)
-    throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
+  public ResponseEntity<RestResponse<AuthResponseDto<DETAIL_DTO>>> login(
+      @RequestBody @Valid OtpLoginDto authDto)
+      throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
     return super.login(authDto);
   }
 

@@ -11,31 +11,37 @@ import com.sixsprints.auth.service.AbstractRoleService;
 import com.sixsprints.auth.util.PermissionUtil;
 import com.sixsprints.core.auth.ModuleDefinition;
 import com.sixsprints.core.auth.PermissionDefinition;
+import com.sixsprints.auth.util.AuthMessageKeys;
+import com.sixsprints.core.constants.ExceptionConstants;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.interceptor.AbstractAuthenticationInterceptor;
 import com.sixsprints.core.service.GenericCrudService;
 
 public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthenticableEntity, ROLE extends AbstractRole>
-  extends AbstractAuthenticationInterceptor<T> {
+    extends AbstractAuthenticationInterceptor<T> {
 
   private static final String USER = "user";
 
   private final AbstractRoleService<ROLE> roleService;
 
-  public AbstractRoleBasedAuthInterceptor(GenericCrudService<T> userService, AbstractRoleService<ROLE> roleService) {
+  public AbstractRoleBasedAuthInterceptor(GenericCrudService<T> userService,
+      AbstractRoleService<ROLE> roleService) {
     super(userService);
     this.roleService = roleService;
   }
 
   @Override
-  protected void checkUserPermissions(T user, ModuleDefinition module, PermissionDefinition permission,
-    boolean required)
-    throws NotAuthenticatedException, EntityNotFoundException {
+  protected void checkUserPermissions(T user, ModuleDefinition module,
+      PermissionDefinition permission, boolean required)
+      throws NotAuthenticatedException, EntityNotFoundException {
     if (PermissionUtil.allAny(module, permission)) {
       return;
     }
-    ROLE role = roleService.findBySlug(user.getRoleSlug());
+    ROLE role = roleService.findOneBySlug(user.getRoleSlug())
+        .orElseThrow(() -> NotAuthenticatedException.childBuilder()
+            .error(ExceptionConstants.ENTITY_NOT_FOUND_WITH_ID).arg(AuthMessageKeys.ROLE)
+            .arg(user.getRoleSlug()).build());
     Boolean hasAccess = PermissionUtil.hasAccess(role, module, permission);
     if (!hasAccess) {
       throwException(required, unauthorisedErrorMessage(user));
@@ -43,7 +49,8 @@ public abstract class AbstractRoleBasedAuthInterceptor<T extends AbstractAuthent
   }
 
   @Override
-  protected void checkIfTokenInvalid(T user, String token, boolean required) throws NotAuthenticatedException {
+  protected void checkIfTokenInvalid(T user, String token, boolean required)
+      throws NotAuthenticatedException {
     List<String> invalidTokens = user.getInvalidTokens();
     if (!CollectionUtils.isEmpty(invalidTokens) && invalidTokens.contains(token)) {
       throwException(required, tokenInvalidErrorMessage());

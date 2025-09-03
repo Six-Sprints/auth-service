@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
+import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
 
 @Document
@@ -24,14 +25,12 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public abstract class AbstractAuthenticableEntity extends AbstractMongoEntity implements Authenticable {
-
-  public final static String PASSWORD = "password";
-
-  public final static String INVALID_TOKENS = "invalidTokens";
+@FieldNameConstants
+public abstract class AbstractAuthenticableEntity extends AbstractMongoEntity
+    implements Authenticable {
 
   @Serial
-  private static final long serialVersionUID = 4277363213912119827L;
+  private static final long serialVersionUID = 1L;
 
   @NotNull
   @Size(min = 1, max = 256)
