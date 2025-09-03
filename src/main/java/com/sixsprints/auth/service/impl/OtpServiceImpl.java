@@ -24,7 +24,7 @@ public class OtpServiceImpl extends AbstractCrudService<Otp> implements OtpServi
     double max = Math.pow(10, length) - 1;
     String otp = String.valueOf((int) RandomUtil.randomDouble(min, max, 0));
     try {
-      return upsert(Otp.builder().authId(authId).otp(otp).build());
+      return upsertOne(Otp.builder().authId(authId).otp(otp).build());
     } catch (EntityInvalidException e) {
     }
     return null;

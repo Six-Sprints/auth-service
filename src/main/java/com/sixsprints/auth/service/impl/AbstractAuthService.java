@@ -15,13 +15,13 @@ import com.sixsprints.auth.dto.Authenticable;
 import com.sixsprints.auth.service.AbstractRoleService;
 import com.sixsprints.auth.service.AuthService;
 import com.sixsprints.auth.service.OtpService;
-import com.sixsprints.auth.util.Messages;
+import com.sixsprints.auth.util.AuthMessageKeys;
 import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
 import com.sixsprints.core.service.AbstractCrudService;
-import com.sixsprints.core.transformer.GenericMapper;
+import com.sixsprints.core.mapper.GenericCrudMapper;
 import com.sixsprints.core.utils.AuthUtil;
 import com.sixsprints.core.utils.EncryptionUtil;
 import com.sixsprints.core.utils.EnvConstants;
@@ -34,14 +34,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity, DTO, DETAIL_DTO, ROLE extends AbstractRole>
-  extends AbstractCrudService<T>
-  implements AuthService<T, DTO, DETAIL_DTO> {
+    extends AbstractCrudService<T> implements AuthService<T, DTO, DETAIL_DTO> {
 
-  private static final String NO_ROLE = "None";
+  private static final String NO_ROLE = AuthMessageKeys.NO_ROLE;
 
-  private final GenericMapper<T, DTO> dtoMapper;
+  private final GenericCrudMapper<T, DTO> dtoMapper;
 
-  private final GenericMapper<T, DETAIL_DTO> detailMapper;
+  private final GenericCrudMapper<T, DETAIL_DTO> detailMapper;
 
   private final NotificationService notificationService;
 
@@ -50,7 +49,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   private final AbstractRoleService<ROLE> roleService;
 
   @Override
-  protected void preCreate(T user) {
+  protected void enhanceEntity(T user) {
     if (StringUtils.isBlank(user.getPassword())) {
       user.setPassword(EncryptionUtil.encrypt(defaultPassword(user)));
     } else
@@ -58,22 +57,24 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   @Override
-  public AuthResponseDto<DETAIL_DTO> register(DTO dto) throws EntityAlreadyExistsException, EntityInvalidException {
+  public AuthResponseDto<DETAIL_DTO> register(DTO dto)
+      throws EntityAlreadyExistsException, EntityInvalidException {
     T domain = dtoMapper.toDomain(dto);
     preRegister(domain);
-    domain = create(domain);
+    domain = insertOne(domain);
     postRegister(domain);
     return generateToken(domain);
   }
 
   @Override
   public AuthResponseDto<DETAIL_DTO> login(Authenticable authenticable)
-    throws NotAuthenticatedException, EntityNotFoundException, EntityInvalidException {
+      throws NotAuthenticatedException {
     T user = findByAuthId(authenticable.authId());
     if (user == null) {
-      throw notFoundException(authenticable.authId());
+      throw NotAuthenticatedException.childBuilder().error(AuthMessageKeys.LOGIN_FAILED)
+          .arg(authenticable.authId()).build();
     }
-    if (wrongPassword(user.getPassword(), authenticable.passcode()) || !user.getActive()) {
+    if (wrongPassword(user.getPassword(), authenticable.passcode())) {
       throw loginFailedException(authenticable);
     }
     return generateToken(user);
@@ -102,14 +103,15 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   @Override
   @Transactional
   public void resetPassword(String authId, String otp, String newPassword)
-    throws EntityInvalidException, EntityNotFoundException {
+      throws EntityInvalidException, EntityNotFoundException {
     Otp otpFromDb = validateOtp(authId, otp);
     T user = findByAuthId(authId);
     if (user == null) {
       throw notFoundException(authId);
     }
-    otpService.delete(otpFromDb);
-    patchUpdateRaw(user.getId(), EncryptionUtil.encrypt(newPassword), AbstractAuthenticableEntity.PASSWORD);
+    otpService.deleteOneById(otpFromDb.getId());
+    user.setPassword(EncryptionUtil.encrypt(newPassword));
+    patchUpdateOneById(user.getId(), user, AbstractAuthenticableEntity.Fields.password);
   }
 
   @Override
@@ -130,7 +132,12 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
       invalidTokens.remove(0);
     }
     invalidTokens.add(token);
-    patchUpdateRaw(user.getId(), invalidTokens, AbstractAuthenticableEntity.INVALID_TOKENS);
+    user.setInvalidTokens(invalidTokens);
+    try {
+      patchUpdateOneById(user.getId(), user, AbstractAuthenticableEntity.Fields.invalidTokens);
+    } catch (Exception e) {
+      log.error(AuthMessageKeys.ERROR_UPDATING_INVALID_TOKENS, e);
+    }
   }
 
   protected abstract T findByAuthId(String authId);
@@ -152,11 +159,8 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   protected MessageDto otpMessage(Otp otp) {
-    return MessageDto.builder()
-      .to(otp.getAuthId())
-      .subject("OTP Generated Successfully")
-      .content(String.format("Your OTP: %s", otp.getOtp()))
-      .build();
+    return MessageDto.builder().to(otp.getAuthId()).subject(AuthMessageKeys.OTP_GENERATED_SUBJECT)
+        .content(String.format(AuthMessageKeys.OTP_GENERATED_CONTENT, otp.getOtp())).build();
   }
 
   protected int otpLength() {
@@ -164,9 +168,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   protected NotAuthenticatedException loginFailedException(Authenticable authenticable)
-    throws NotAuthenticatedException {
-    return NotAuthenticatedException.childBuilder().error((Messages.LOGIN_FAILED))
-      .arg(authenticable.authId()).data(authenticable.authId()).build();
+      throws NotAuthenticatedException {
+    return NotAuthenticatedException.childBuilder().error((AuthMessageKeys.LOGIN_FAILED))
+        .arg(authenticable.authId()).data(authenticable.authId()).build();
   }
 
   protected AuthResponseDto<DETAIL_DTO> generateToken(T domain) {
@@ -175,23 +179,13 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
     ROLE role = fetchRole(roleSlug);
 
     return AuthResponseDto.<DETAIL_DTO>builder()
-      .token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
-      .data(detailMapper.toDto(domain))
-      .roleName(role == null ? NO_ROLE : role.getName())
-      .modulePermissions(role == null ? new ArrayList<>() : role.getModulePermissions())
-      .build();
+        .token(AuthUtil.createToken(domain.getId(), tokenExpiryInDays()))
+        .data(detailMapper.toDto(domain)).roleName(role == null ? NO_ROLE : role.getName())
+        .modulePermissions(role == null ? new ArrayList<>() : role.getModulePermissions()).build();
   }
 
   private ROLE fetchRole(String roleSlug) {
-    try {
-      if (StringUtils.isNotBlank(roleSlug)) {
-        return roleService.findBySlug(roleSlug);
-      }
-    } catch (EntityNotFoundException ex) {
-      log.error("Role not found with slug = {}", roleSlug);
-      log.error(ex.getMessage(), ex);
-    }
-    return null;
+    return roleService.findOneBySlug(roleSlug).orElse(null);
   }
 
   protected int tokenExpiryInDays() {

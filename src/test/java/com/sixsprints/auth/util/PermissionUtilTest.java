@@ -18,40 +18,37 @@ public class PermissionUtilTest {
   @Test
   public void shouldHaveAccess() {
     AbstractRole role = mockRoleWithUserCreateAndReadAll();
-    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.ADD), "Must be true");
-    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.VIEW), "Must be true");
-    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.ANY, BasicPermissionEnum.VIEW),
-      "Must be true for Any Entity");
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.CREATE),
+        "Must be true");
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.READ),
+        "Must be true");
+    Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.ANY, BasicPermissionEnum.READ),
+        "Must be true for Any Entity");
     Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.ANY),
-      "Must be true for Any Access");
+        "Must be true for Any Access");
 
     Assert.isTrue(PermissionUtil.hasAccess(role, MockModule.COMPANY, BasicPermissionEnum.DELETE),
-      "Must be true for Any Access");
+        "Must be true for Any Access");
   }
 
   @Test
   public void shouldNotHaveAccess() {
     AbstractRole role = mockRoleWithUserCreateAndReadAll();
     Assert.isTrue(!PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.DELETE),
-      "Must not be true for User Delete All");
-    Assert.isTrue(!PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.EDIT),
-      "Must not be true for User Update All");
+        "Must not be true for User Delete All");
+    Assert.isTrue(!PermissionUtil.hasAccess(role, MockModule.USER, BasicPermissionEnum.UPDATE),
+        "Must not be true for User Update All");
   }
 
   private AbstractRole mockRoleWithUserCreateAndReadAll() {
 
     return Role.builder().name("R1")
-      .modulePermission(ModulePermission.builder()
-        .module(MockModule.USER)
-        .permission(BasicPermissionEnum.ADD)
-        .permission(BasicPermissionEnum.VIEW)
-        .build())
+        .modulePermission(ModulePermission.builder().module(MockModule.USER)
+            .permission(BasicPermissionEnum.CREATE).permission(BasicPermissionEnum.READ).build())
 
-      .modulePermission(ModulePermission.builder()
-        .module(MockModule.COMPANY)
-        .permission(BasicPermissionEnum.ANY)
-        .build())
-      .build();
+        .modulePermission(ModulePermission.builder().module(MockModule.COMPANY)
+            .permission(BasicPermissionEnum.ANY).build())
+        .build();
   }
 
 }
