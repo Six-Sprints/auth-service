@@ -52,8 +52,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   protected void enhanceEntity(T user) {
     if (StringUtils.isBlank(user.getPassword())) {
       user.setPassword(EncryptionUtil.encrypt(defaultPassword(user)));
-    } else
+    } else {
       user.setPassword(EncryptionUtil.encrypt(user.getPassword()));
+    }
   }
 
   @Override
