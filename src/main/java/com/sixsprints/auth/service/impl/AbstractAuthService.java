@@ -25,6 +25,7 @@ import com.sixsprints.core.mapper.GenericCrudMapper;
 import com.sixsprints.core.utils.AuthUtil;
 import com.sixsprints.core.utils.EncryptionUtil;
 import com.sixsprints.core.utils.EnvConstants;
+import com.sixsprints.core.utils.RandomUtil;
 import com.sixsprints.notification.dto.MessageDto;
 import com.sixsprints.notification.service.NotificationService;
 
@@ -50,6 +51,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
 
   @Override
   protected void enhanceEntity(T user) {
+    super.enhanceEntity(user);
     if (StringUtils.isBlank(user.getPassword())) {
       user.setPassword(EncryptionUtil.encrypt(defaultPassword(user)));
     } else {
@@ -152,6 +154,9 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   protected String defaultPassword(T user) {
+    if (StringUtils.isBlank(user.authId())) {
+      return RandomUtil.randomAlphaNumericString(9) + "A1!";
+    }
     return user.authId();
   }
 
