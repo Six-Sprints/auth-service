@@ -113,7 +113,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
       throw notFoundException(authId);
     }
     otpService.deleteOneById(otpFromDb.getId());
-    user.setPassword(EncryptionUtil.encrypt(newPassword));
+    user.setPassword(newPassword);
     patchUpdateOneById(user.getId(), user, AbstractAuthenticableEntity.Fields.password);
   }
 
@@ -165,8 +165,10 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   }
 
   protected MessageDto otpMessage(Otp otp) {
-    return MessageDto.builder().to(otp.getAuthId()).subject(AuthMessageKeys.OTP_GENERATED_SUBJECT)
-        .content(String.format(AuthMessageKeys.OTP_GENERATED_CONTENT, otp.getOtp())).build();
+    return MessageDto.builder().to(otp.getAuthId())
+        .subject(localisedMessage(AuthMessageKeys.OTP_GENERATED_SUBJECT, null))
+        .content(localisedMessage(AuthMessageKeys.OTP_GENERATED_CONTENT, List.of(otp.getOtp())))
+        .build();
   }
 
   protected int otpLength() {
