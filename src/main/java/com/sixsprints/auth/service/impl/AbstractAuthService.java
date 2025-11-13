@@ -2,16 +2,18 @@ package com.sixsprints.auth.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
 import com.sixsprints.auth.domain.AbstractAuthenticableEntity;
 import com.sixsprints.auth.domain.AbstractRole;
 import com.sixsprints.auth.domain.Otp;
 import com.sixsprints.auth.dto.AuthResponseDto;
 import com.sixsprints.auth.dto.Authenticable;
+import com.sixsprints.auth.hooks.PostLoginHook;
+import com.sixsprints.auth.hooks.PostRegisterHook;
+import com.sixsprints.auth.hooks.PreRegisterHook;
 import com.sixsprints.auth.service.AbstractRoleService;
 import com.sixsprints.auth.service.AuthService;
 import com.sixsprints.auth.service.OtpService;
@@ -20,15 +22,14 @@ import com.sixsprints.core.exception.EntityAlreadyExistsException;
 import com.sixsprints.core.exception.EntityInvalidException;
 import com.sixsprints.core.exception.EntityNotFoundException;
 import com.sixsprints.core.exception.NotAuthenticatedException;
-import com.sixsprints.core.service.AbstractCrudService;
 import com.sixsprints.core.mapper.GenericCrudMapper;
+import com.sixsprints.core.service.AbstractCrudService;
 import com.sixsprints.core.utils.AuthUtil;
 import com.sixsprints.core.utils.EncryptionUtil;
 import com.sixsprints.core.utils.EnvConstants;
 import com.sixsprints.core.utils.RandomUtil;
 import com.sixsprints.notification.dto.MessageDto;
 import com.sixsprints.notification.service.NotificationService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,6 +49,15 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   private final OtpService otpService;
 
   private final AbstractRoleService<ROLE> roleService;
+
+  @Autowired(required = false)
+  protected List<PreRegisterHook<T>> preRegisterHooks;
+
+  @Autowired(required = false)
+  protected List<PostRegisterHook<T>> postRegisterHooks;
+
+  @Autowired(required = false)
+  protected List<PostLoginHook<T>> postLoginHooks;
 
   @Override
   protected void enhanceEntity(T user) {
@@ -80,6 +90,7 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
     if (wrongPassword(user.getPassword(), authenticable.passcode())) {
       throw loginFailedException(authenticable);
     }
+    postLogin(user);
     return generateToken(user);
   }
 
@@ -146,11 +157,27 @@ public abstract class AbstractAuthService<T extends AbstractAuthenticableEntity,
   protected abstract T findByAuthId(String authId);
 
   protected void preRegister(T domain) {
-
+    if (!CollectionUtils.isEmpty(preRegisterHooks)) {
+      for (PreRegisterHook<T> preRegisterHook : preRegisterHooks) {
+        preRegisterHook.preRegister(domain);
+      }
+    }
   }
 
   protected void postRegister(T domain) {
+    if (!CollectionUtils.isEmpty(postRegisterHooks)) {
+      for (PostRegisterHook<T> postRegisterHook : postRegisterHooks) {
+        postRegisterHook.postRegister(domain);
+      }
+    }
+  }
 
+  protected void postLogin(T user) {
+    if (!CollectionUtils.isEmpty(postLoginHooks)) {
+      for (PostLoginHook<T> postLoginHook : postLoginHooks) {
+        postLoginHook.postLogin(user);
+      }
+    }
   }
 
   protected String defaultPassword(T user) {
